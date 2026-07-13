@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Refeitório do Dia</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2C4A3B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Refeitório">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF7F0;
+    --paper:#FFFFFF;
+    --ink:#241F1B;
+    --ink-soft:#6B6459;
+    --pine:#2C4A3B;
+    --pine-dark:#1D332A;
+    --amber:#E3A857;
+    --amber-dark:#C98B36;
+    --tomato:#C1443C;
+    --line:#E8E1D3;
+    --radius:18px;
+    --shadow:0 8px 24px rgba(36,31,27,.08);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;overscroll-behavior:none;}
+  h1,h2,h3,.serif{font-family:'Fraunces',Georgia,serif;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;}
+  input,select,textarea{font-family:inherit;font-size:16px;}
+  .app{max-width:520px;margin:0 auto;min-height:100vh;position:relative;padding-bottom:90px;}
+  .hide{display:none !important;}
+
+  /* ---------- Splash ---------- */
+  #tela-splash{position:fixed;inset:0;background:var(--pine);display:flex;flex-direction:column;
+    align-items:center;justify-content:center;color:#fff;z-index:999;transition:opacity .4s;}
+  #tela-splash h1{font-size:28px;font-weight:600;margin:16px 0 4px;}
+  #tela-splash p{opacity:.75;font-size:14px;margin:0;}
+  .prato-icone{width:64px;height:64px;border-radius:50%;border:3px solid var(--amber);
+    display:flex;align-items:center;justify-content:center;font-size:30px;background:rgba(255,255,255,.06);}
+
+  /* ---------- Topbar ---------- */
+  .topbar{position:sticky;top:0;z-index:20;background:var(--bg);padding:18px 20px 12px;
+    display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);}
+  .topbar .titulo{font-size:20px;font-weight:600;}
+  .topbar .sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .icon-btn{width:38px;height:38px;border-radius:50%;background:var(--paper);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:16px;}
+
+  /* ---------- Seleção de perfil ---------- */
+  .tela-centro{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:28px;gap:14px;}
+  .marca{text-align:center;margin-bottom:24px;}
+  .marca .prato-icone{margin:0 auto 14px;background:var(--pine);color:#fff;}
+  .marca h1{font-size:26px;margin:0 0 6px;color:var(--pine-dark);}
+  .marca p{color:var(--ink-soft);font-size:14px;margin:0;}
+  .cartao-opcao{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);}
+  .cartao-opcao .emoji{font-size:26px;width:44px;height:44px;border-radius:12px;background:var(--bg);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cartao-opcao .txt{flex:1;text-align:left;}
+  .cartao-opcao .txt b{display:block;font-size:15.5px;}
+  .cartao-opcao .txt span{font-size:12.5px;color:var(--ink-soft);}
+  .cartao-opcao .seta{color:var(--ink-soft);font-size:18px;}
+
+  /* ---------- Botões padrão ---------- */
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:15px 20px;
+    border-radius:14px;font-weight:600;font-size:15px;transition:transform .1s;}
+  .btn:active{transform:scale(.97);}
+  .btn-primario{background:var(--pine);color:#fff;}
+  .btn-amber{background:var(--amber);color:var(--pine-dark);}
+  .btn-fantasma{background:var(--paper);border:1px solid var(--line);color:var(--ink);}
+  .btn-perigo{background:#fff;border:1px solid var(--tomato);color:var(--tomato);}
+  .btn-bloco{width:100%;}
+  .campo{width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--line);
+    background:var(--paper);font-size:15px;margin-bottom:10px;}
+  .campo:focus{outline:2px solid var(--pine);outline-offset:1px;}
+  label.rotulo{font-size:12.5px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;
+    letter-spacing:.03em;margin:14px 0 6px;display:block;}
+
+  /* ---------- Conteúdo ---------- */
+  .conteudo{padding:16px 20px 20px;}
+
+  /* ---------- Tabs Gerente ---------- */
+  .tabs{display:flex;gap:6px;padding:0 20px 14px;overflow-x:auto;}
+  .tab{padding:9px 16px;border-radius:100px;font-size:13.5px;font-weight:600;color:var(--ink-soft);
+    background:var(--paper);border:1px solid var(--line);white-space:nowrap;}
+  .tab.ativa{background:var(--pine);color:#fff;border-color:var(--pine);}
+
+  /* ---------- Card de prato (gerente) ---------- */
+  .prato-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px;display:flex;gap:12px;margin-bottom:12px;box-shadow:var(--shadow);position:relative;}
+  .prato-foto{width:64px;height:64px;border-radius:12px;background:var(--bg);flex-shrink:0;
+    background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;
+    font-size:24px;color:var(--ink-soft);overflow:hidden;}
+  .prato-info{flex:1;min-width:0;}
+  .prato-info .nome{font-family:'Fraunces';font-weight:600;font-size:16px;margin:0 0 2px;}
+  .prato-info .desc{font-size:12.5px;color:var(--ink-soft);margin:0 0 6px;line-height:1.4;}
+  .prato-tags{display:flex;gap:6px;flex-wrap:wrap;}
+  .tagzinha{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:100px;background:var(--bg);
+    color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;}
+  .tagzinha.esgotado{background:#FBE8E6;color:var(--tomato);}
+  .prato-acoes{display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
+  .mini-btn{width:32px;height:32px;border-radius:9px;background:var(--bg);display:flex;
+    align-items:center;justify-content:center;font-size:14px;}
+
+  /* ---------- Cardápio Funcionário ---------- */
+  .prato-escolha{background:var(--paper);border:2px solid var(--line);border-radius:var(--radius);
+    padding:16px;margin-bottom:14px;box-shadow:var(--shadow);transition:.15s;}
+  .prato-escolha.selecionado{border-color:var(--pine);background:#F1F5F1;}
+  .prato-escolha .foto-grande{width:100%;height:150px;border-radius:12px;background:var(--bg);
+    background-size:cover;background-position:center;margin-bottom:12px;display:flex;
+    align-items:center;justify-content:center;font-size:38px;color:var(--ink-soft);overflow:hidden;}
+  .prato-escolha .nome{font-size:19px;margin:0 0 4px;}
+  .prato-escolha .desc{font-size:13.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 12px;}
+  .prato-escolha .rodape-escolha{display:flex;align-items:center;justify-content:space-between;}
+  .radio-fake{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;}
+  .prato-escolha.selecionado .radio-fake{border-color:var(--pine);background:var(--pine);color:#fff;font-size:13px;}
+  .prato-escolha.esgotado{opacity:.5;pointer-events:none;}
+
+  /* ---------- Confirmação ---------- */
+  .confirmacao-box{background:var(--pine);color:#fff;border-radius:var(--radius);padding:24px;text-align:center;}
+  .confirmacao-box .selo{font-size:44px;margin-bottom:8px;}
+  .confirmacao-box h2{margin:0 0 6px;font-size:20px;}
+  .confirmacao-box p{opacity:.8;font-size:13.5px;margin:0;}
+
+  /* ---------- Toggle / switch ---------- */
+  .linha-config{display:flex;align-items:center;justify-content:space-between;padding:14px 0;
+    border-bottom:1px solid var(--line);gap:12px;}
+  .linha-config .txt b{display:block;font-size:14.5px;}
+  .linha-config .txt span{font-size:12px;color:var(--ink-soft);}
+  .switch{width:46px;height:27px;border-radius:100px;background:var(--line);position:relative;flex-shrink:0;transition:.2s;}
+  .switch.on{background:var(--pine);}
+  .switch .bolinha{width:21px;height:21px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;
+    transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3);}
+  .switch.on .bolinha{left:22px;}
+
+  .chip-select{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px;}
+  .chip{padding:9px 14px;border-radius:100px;background:var(--paper);border:1px solid var(--line);
+    font-size:13px;font-weight:600;color:var(--ink-soft);}
+  .chip.ativo{background:var(--pine);color:#fff;border-color:var(--pine);}
+
+  /* ---------- Barra inferior fixa ---------- */
+  .barra-fixa{position:fixed;bottom:0;left:0;right:0;background:var(--paper);border-top:1px solid var(--line);
+    padding:12px 20px calc(12px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;z-index:15;}
+
+  /* ---------- Modal ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(36,31,27,.5);z-index:50;display:flex;
+    align-items:flex-end;justify-content:center;}
+  .modal{background:var(--bg);width:100%;max-width:520px;border-radius:22px 22px 0 0;
+    max-height:88vh;overflow-y:auto;padding:22px 20px calc(22px + env(safe-area-inset-bottom));}
+  .modal-titulo{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .modal-titulo h3{margin:0;font-size:18px;}
+
+  /* ---------- Relatório ---------- */
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+  .stat-box{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px;}
+  .stat-box .num{font-family:'Fraunces';font-size:26px;font-weight:600;color:var(--pine-dark);}
+  .stat-box .lbl{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;}
+  .barra-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .barra-item .nome{font-size:13px;width:110px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .barra-fundo{flex:1;height:10px;background:var(--line);border-radius:100px;overflow:hidden;}
+  .barra-preenchida{height:100%;background:var(--amber);border-radius:100px;}
+  .barra-item .qtd{font-size:12.5px;font-weight:700;width:22px;text-align:right;}
+
+  /* ---------- Feedback ---------- */
+  .carinhas{display:flex;gap:12px;justify-content:center;margin:18px 0;}
+  .carinha{width:64px;height:64px;border-radius:50%;background:var(--paper);border:2px solid var(--line);
+    font-size:28px;display:flex;align-items:center;justify-content:center;}
+  .carinha.marcada{border-color:var(--amber);background:#FFF6E8;transform:scale(1.08);}
+
+  /* ---------- Instalar banner ---------- */
+  #banner-instalar{position:fixed;left:16px;right:16px;bottom:16px;max-width:488px;margin:0 auto;
+    background:var(--pine-dark);color:#fff;border-radius:16px;padding:14px 16px;display:flex;
+    align-items:center;gap:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:40;}
+  #banner-instalar .txt{flex:1;font-size:13px;}
+  #banner-instalar b{display:block;font-size:14px;margin-bottom:2px;}
+  #banner-instalar button{background:var(--amber);color:var(--pine-dark);padding:9px 14px;border-radius:10px;
+    font-weight:700;font-size:12.5px;white-space:nowrap;}
+  #banner-instalar .fechar{background:none;color:#fff;opacity:.6;font-size:18px;padding:0 4px;}
+
+  .rodape-dev{text-align:center;font-size:11px;color:var(--ink-soft);opacity:.6;padding:20px 0 0;}
+  .vazio{text-align:center;padding:40px 20px;color:var(--ink-soft);}
+  .vazio .em{font-size:32px;display:block;margin-bottom:8px;}
+  .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--pine-dark);color:#fff;
+    padding:12px 20px;border-radius:100px;font-size:13.5px;font-weight:600;z-index:100;box-shadow:var(--shadow);}
+</style>
+</head>
+<body>
+
+<div id="tela-splash">
+  <div class="prato-icone">🍽️</div>
+  <h1>Refeitório do Dia</h1>
+  <p>Carregando…</p>
+</div>
+
+<div class="app hide" id="app">
+
+  <!-- ===================== SELEÇÃO DE PERFIL ===================== -->
+  <div id="tela-perfil" class="tela-centro hide">
+    <div class="marca">
+      <div class="prato-icone">🍽️</div>
+      <h1>Refeitório do Dia</h1>
+      <p>Escolha como deseja entrar</p>
+    </div>
+    <button class="cartao-opcao" onclick="abrirLoginGerente()">
+      <div class="emoji">👨‍🍳</div>
+      <div class="txt"><b>Sou Gerente</b><span>Cardápio, configurações e relatórios</span></div>
+      <div class="seta">›</div>
+    </button>
+    <button class="cartao-opcao" onclick="irParaFuncionario()">
+      <div class="emoji">🧑‍🏭</div>
+      <div class="txt"><b>Sou Funcionário</b><span>Escolher o almoço de hoje</span></div>
+      <div class="seta">›</div>
+    </button>
+  </div>
+
+  <!-- ===================== LOGIN GERENTE ===================== -->
+  <div id="tela-login-gerente" class="tela-centro hide">
+    <div class="marca">
+      <div class="prato-icone">🔒</div>
+      <h1>Área do Gerente</h1>
+      <p>Digite o código de acesso</p>
+    </div>
+    <input type="password" inputmode="numeric" class="campo" id="input-senha-gerente" placeholder="Código de acesso">
+    <button class="btn btn-primario btn-bloco" onclick="validarSenhaGerente()">Entrar</button>
+    <button class="btn btn-fantasma btn-bloco" onclick="mostrarTela('tela-perfil')">Voltar</button>
+  </div>
+
+  <!-- ===================== IDENTIFICAÇÃO FUNCIONÁRIO ===================== -->
+  <div id="tela-identificacao" class="tela-centro hide">
+    <div class="marca">
+      <div class="prato-icone">👋</div>
+      <h1>Antes de começar</h1>
+      <p>Só precisamos saber quem é você</p>
+    </div>
+    <div id="campos-identificacao"></div>
+    <button class="btn btn-primario btn-bloco" onclick="salvarIdentificacao()">Continuar</button>
+  </div>
+
+  <!-- ===================== FUNCIONÁRIO: CARDÁPIO ===================== -->
+  <div id="tela-funcionario" class="hide">
+    <div class="topbar">
+      <div>
+        <div class="titulo" id="saudacao-funcionario">Olá!</div>
+        <div class="sub" id="data-hoje-func">—</div>
+      </div>
+      <button class="icon-btn" onclick="abrirMenuFuncionario()">⋯</button>
+    </div>
+    <div class="conteudo" id="lista-cardapio-funcionario"></div>
+  </div>
+
+  <!-- ===================== GERENTE: PAINEL ===================== -->
+  <div id="tela-gerente" class="hide">
+    <div class="topbar">
+      <div>
+        <div class="titulo">Painel do Gerente</div>
+        <div class="sub" id="data-hoje-gerente">—</div>
+      </div>
+      <button class="icon-btn" onclick="sairGerente()">⎋</button>
+    </div>
+    <div class="tabs">
+      <button class="tab ativa" data-tab="cardapio" onclick="trocarTabGerente('cardapio')">Cardápio</button>
+      <button class="tab" data-tab="relatorio" onclick="trocarTabGerente('relatorio')">Relatório</button>
+      <button class="tab" data-tab="config" onclick="trocarTabGerente('config')">Configurações</button>
+    </div>
+
+    <div class="conteudo" id="painel-cardapio">
+      <div id="lista-pratos-gerente"></div>
+    </div>
+
+    <div class="conteudo hide" id="painel-relatorio"></div>
+
+    <div class="conteudo hide" id="painel-config"></div>
+
+    <div class="barra-fixa" id="barra-add-prato">
+      <button class="btn btn-amber btn-bloco" onclick="abrirModalPrato()">+ Adicionar prato</button>
+    </div>
+  </div>
+
+  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto</div>
+</div>
+
+<div id="banner-instalar" class="hide">
+  <div class="txt"><b>Instale o app</b>Acesso rápido, direto da tela inicial.</div>
+  <button onclick="instalarPWA()">Instalar</button>
+  <button class="fechar" onclick="fecharBannerInstalar()">✕</button>
+</div>
+
+<div id="raiz-modal"></div>
+
+<script type="module">
+/* ============================================================
+   FIREBASE — mesmo projeto staffcheck-d6f20, prefixo refeitorio_
+   ⚠️ Cole aqui o firebaseConfig real (o mesmo dos seus outros apps)
+   ============================================================ */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc,
+  onSnapshot, query, where, addDoc, serverTimestamp, orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "COLE_AQUI",
+  authDomain: "staffcheck-d6f20.firebaseapp.com",
+  projectId: "staffcheck-d6f20",
+  storageBucket: "staffcheck-d6f20.appspot.com",
+  messagingSenderId: "COLE_AQUI",
+  appId: "COLE_AQUI"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const PREFIXO = "refeitorio_";
+
+/* ============================================================
+   SUPABASE — bucket "refeitorio" (public), pra fotos dos pratos
+   ⚠️ Cole aqui a URL e a chave anon do seu projeto Supabase
+   ============================================================ */
+const SUPABASE_URL = "COLE_AQUI";
+const SUPABASE_ANON_KEY = "COLE_AQUI";
+const SUPABASE_BUCKET = "refeitorio";
+
+async function uploadFotoSupabase(file, caminho){
+  const url = `${SUPABASE_URL}/storage/v1/object/${SUPABASE_BUCKET}/${caminho}`;
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+      "apikey": SUPABASE_ANON_KEY,
+      "Content-Type": file.type,
+      "x-upsert": "true"
+    },
+    body: file
+  });
+  if(!resp.ok) throw new Error("Falha no upload da foto");
+  return `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${caminho}`;
+}
+
+/* ============================================================
+   ESTADO GLOBAL
+   ============================================================ */
+const SENHA_GERENTE = "refeitorio2026"; // troque depois nas Configurações (Etapa 2)
+let CONFIG = null;               // doc refeitorio_config/geral
+let CARDAPIO_HOJE = [];          // pratos do dia
+let PEDIDOS_HOJE = [];           // pedidos de hoje (tempo real)
+let FUNCIONARIO = null;          // dados salvos no localStorage
+let PEDIDO_ATUAL = null;         // pedido já feito hoje por esse funcionário
+let TAB_GERENTE_ATIVA = "cardapio";
+
+function hojeISO(){
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+function dataFormatada(){
+  return new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long' });
+}
+function mostrarTela(id){
+  document.querySelectorAll('#app > .tela-centro, #app > div[id^="tela-"]').forEach(el=>el.classList.add('hide'));
+  document.getElementById(id).classList.remove('hide');
+}
+function toast(msg){
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 2600);
+}
+
+/* ============================================================
+   CONFIGURAÇÃO PADRÃO (usada se ainda não existir no Firestore)
+   ============================================================ */
+const CONFIG_PADRAO = {
+  identificacao: "nome_empresa",     // nome_empresa | matricula | telefone
+  pagamentos: ["fatura_empresa"],    // fatura_empresa | pix_dinheiro | vr_va
+  confirmarPresenca: false,
+  feedbackPosAlmoco: true,
+  campoSugestoes: true,
+  empresas: [
+    { codigo: "emp1", nome: "Empresa Exemplo Ltda" }
+  ]
+};
+
+async function carregarConfig(){
+  const ref = doc(db, PREFIXO+"config", "geral");
+  const snap = await getDoc(ref);
+  if(snap.exists()){
+    CONFIG = { ...CONFIG_PADRAO, ...snap.data() };
+  } else {
+    CONFIG = { ...CONFIG_PADRAO };
+    await setDoc(ref, CONFIG);
+  }
+}
+async function salvarConfig(){
+  const ref = doc(db, PREFIXO+"config", "geral");
+  await setDoc(ref, CONFIG, { merge:true });
+}
+
+/* ============================================================
+   INICIALIZAÇÃO
+   ============================================================ */
+async function iniciar(){
+  await carregarConfig();
+  escutarCardapioHoje();
+  escutarPedidosHoje();
+
+  document.getElementById('data-hoje-func').textContent = dataFormatada();
+  document.getElementById('data-hoje-gerente').textContent = dataFormatada();
+
+  document.getElementById('tela-splash').style.opacity = '0';
+  setTimeout(()=>{
+    document.getElementById('tela-splash').classList.add('hide');
+    document.getElementById('app').classList.remove('hide');
+    const salvo = localStorage.getItem('refeitorio_funcionario');
+    if(salvo){
+      FUNCIONARIO = JSON.parse(salvo);
+      mostrarTela('tela-funcionario');
+    } else {
+      mostrarTela('tela-perfil');
+    }
+  }, 400);
+
+  configurarInstalacaoPWA();
+  registrarServiceWorker();
+}
+window.mostrarTela = mostrarTela;
+iniciar();
+
+/* ============================================================
+   NAVEGAÇÃO ENTRE PERFIS
+   ============================================================ */
+window.abrirLoginGerente = () => mostrarTela('tela-login-gerente');
+
+window.validarSenhaGerente = () => {
+  const senha = document.getElementById('input-senha-gerente').value;
+  if(senha === SENHA_GERENTE){
+    mostrarTela('tela-gerente');
+    renderizarPratosGerente();
+  } else {
+    toast('Código incorreto');
+  }
+};
+window.sairGerente = () => mostrarTela('tela-perfil');
+
+window.irParaFuncionario = () => {
+  const salvo = localStorage.getItem('refeitorio_funcionario');
+  if(salvo){
+    FUNCIONARIO = JSON.parse(salvo);
+    mostrarTela('tela-funcionario');
+    renderizarSaudacao();
+  } else {
+    montarCamposIdentificacao();
+    mostrarTela('tela-identificacao');
+  }
+};
+
+/* ============================================================
+   IDENTIFICAÇÃO DO FUNCIONÁRIO (conforme configuração)
+   ============================================================ */
+function montarCamposIdentificacao(){
+  const box = document.getElementById('campos-identificacao');
+  let html = `<label class="rotulo">Seu nome</label>
+    <input class="campo" id="id-nome" placeholder="Nome completo">`;
+
+  if(CONFIG.identificacao === "nome_empresa"){
+    html += `<label class="rotulo">Sua empresa</label>
+      <select class="campo" id="id-empresa">
+        ${CONFIG.empresas.map(e=>`<option value="${e.codigo}">${e.nome}</option>`).join('')}
+      </select>`;
+  } else if(CONFIG.identificacao === "matricula"){
+    html += `<label class="rotulo">Sua empresa</label>
+      <select class="campo" id="id-empresa">
+        ${CONFIG.empresas.map(e=>`<option value="${e.codigo}">${e.nome}</option>`).join('')}
+      </select>
+      <label class="rotulo">Matrícula / crachá</label>
+      <input class="campo" id="id-matricula" placeholder="Número da matrícula">`;
+  } else if(CONFIG.identificacao === "telefone"){
+    html += `<label class="rotulo">WhatsApp</label>
+      <input class="campo" id="id-telefone" inputmode="numeric" placeholder="(19) 90000-0000">`;
+  }
+  box.innerHTML = html;
+}
+
+window.salvarIdentificacao = () => {
+  const nome = document.getElementById('id-nome').value.trim();
+  if(!nome){ toast('Digite seu nome'); return; }
+
+  const dados = { nome };
+  if(CONFIG.identificacao === "nome_empresa" || CONFIG.identificacao === "matricula"){
+    const sel = document.getElementById('id-empresa');
+    dados.empresaCodigo = sel.value;
+    dados.empresaNome = sel.options[sel.selectedIndex].textContent;
+  }
+  if(CONFIG.identificacao === "matricula"){
+    dados.matricula = document.getElementById('id-matricula').value.trim();
+  }
+  if(CONFIG.identificacao === "telefone"){
+    dados.telefone = document.getElementById('id-telefone').value.trim();
+  }
+
+  FUNCIONARIO = dados;
+  localStorage.setItem('refeitorio_funcionario', JSON.stringify(dados));
+  mostrarTela('tela-funcionario');
+  renderizarSaudacao();
+};
+
+window.abrirMenuFuncionario = () => {
+  if(confirm('Trocar de funcionário / sair deste perfil?')){
+    localStorage.removeItem('refeitorio_funcionario');
+    FUNCIONARIO = null;
+    mostrarTela('tela-perfil');
+  }
+};
+
+function renderizarSaudacao(){
+  const primeiroNome = (FUNCIONARIO?.nome || '').split(' ')[0];
+  document.getElementById('saudacao-funcionario').textContent = `Olá, ${primeiroNome || 'tudo bem'}!`;
+}
+
+/* ============================================================
+   CARDÁPIO — TEMPO REAL (Firestore)
+   Estrutura: refeitorio_cardapio / {AAAA-MM-DD} / pratos: [ {..} ]
+   ============================================================ */
+function escutarCardapioHoje(){
+  const ref = doc(db, PREFIXO+"cardapio", hojeISO());
+  onSnapshot(ref, (snap)=>{
+    CARDAPIO_HOJE = snap.exists() ? (snap.data().pratos || []) : [];
+    renderizarPratosGerente();
+    renderizarCardapioFuncionario();
+  });
+}
+
+async function salvarCardapioHoje(){
+  const ref = doc(db, PREFIXO+"cardapio", hojeISO());
+  await setDoc(ref, { pratos: CARDAPIO_HOJE, atualizadoEm: serverTimestamp() }, { merge:true });
+}
+
+/* ---------- Render: lado Gerente ---------- */
+function renderizarPratosGerente(){
+  const box = document.getElementById('lista-pratos-gerente');
+  if(!box) return;
+  if(CARDAPIO_HOJE.length === 0){
+    box.innerHTML = `<div class="vazio"><span class="em">🍽️</span>Nenhum prato cadastrado hoje.<br>Toque em "Adicionar prato" abaixo.</div>`;
+    return;
+  }
+  box.innerHTML = CARDAPIO_HOJE.map((p, i) => `
+    <div class="prato-card">
+      <div class="prato-foto" style="${p.foto ? `background-image:url('${p.foto}')` : ''}">${p.foto ? '' : '🍲'}</div>
+      <div class="prato-info">
+        <p class="nome">${p.nome}</p>
+        <p class="desc">${p.descricao || ''}</p>
+        <div class="prato-tags">
+          <span class="tagzinha">${p.categoria || 'Prato'}</span>
+          ${p.esgotado ? `<span class="tagzinha esgotado">Esgotado</span>` : ''}
+        </div>
+      </div>
+      <div class="prato-acoes">
+        <button class="mini-btn" onclick="alternarEsgotado(${i})">${p.esgotado ? '↺' : '⛔'}</button>
+        <button class="mini-btn" onclick="excluirPrato(${i})">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+window.alternarEsgotado = async (i) => {
+  CARDAPIO_HOJE[i].esgotado = !CARDAPIO_HOJE[i].esgotado;
+  await salvarCardapioHoje();
+};
+window.excluirPrato = async (i) => {
+  if(!confirm(`Remover "${CARDAPIO_HOJE[i].nome}" do cardápio de hoje?`)) return;
+  CARDAPIO_HOJE.splice(i,1);
+  await salvarCardapioHoje();
+};
+
+/* ---------- Modal: adicionar prato ---------- */
+window.abrirModalPrato = () => {
+  const raiz = document.getElementById('raiz-modal');
+  raiz.innerHTML = `
+    <div class="overlay" onclick="if(event.target===this) fecharModal()">
+      <div class="modal">
+        <div class="modal-titulo"><h3>Novo prato</h3><button class="icon-btn" onclick="fecharModal()">✕</button></div>
+        <label class="rotulo">Foto do prato</label>
+        <input type="file" accept="image/*" capture="environment" class="campo" id="np-foto">
+        <label class="rotulo">Nome do prato</label>
+        <input class="campo" id="np-nome" placeholder="Ex: Feijoada completa">
+        <label class="rotulo">Descrição / acompanhamentos</label>
+        <textarea class="campo" id="np-desc" rows="3" placeholder="Ex: acompanha arroz, couve, farofa e laranja"></textarea>
+        <label class="rotulo">Categoria</label>
+        <div class="chip-select" id="np-categorias">
+          ${['Prato principal','Vegetariano','Acompanhamento','Salada','Sobremesa'].map(c=>
+            `<button type="button" class="chip" data-cat="${c}" onclick="selecionarCategoria(this)">${c}</button>`
+          ).join('')}
+        </div>
+        <div style="margin-top:18px;">
+          <button class="btn btn-primario btn-bloco" onclick="confirmarNovoPrato()">Adicionar ao cardápio de hoje</button>
+        </div>
+      </div>
+    </div>`;
+};
+window.selecionarCategoria = (el) => {
+  document.querySelectorAll('#np-categorias .chip').forEach(c=>c.classList.remove('ativo'));
+  el.classList.add('ativo');
+};
+window.fecharModal = () => { document.getElementById('raiz-modal').innerHTML = ''; };
+
+window.confirmarNovoPrato = async () => {
+  const nome = document.getElementById('np-nome').value.trim();
+  if(!nome){ toast('Digite o nome do prato'); return; }
+  const desc = document.getElementById('np-desc').value.trim();
+  const catEl = document.querySelector('#np-categorias .chip.ativo');
+  const categoria = catEl ? catEl.dataset.cat : 'Prato principal';
+  const fotoInput = document.getElementById('np-foto');
+
+  let fotoUrl = "";
+  if(fotoInput.files[0]){
+    try{
+      toast('Enviando foto…');
+      const caminho = `${hojeISO()}/${Date.now()}_${fotoInput.files[0].name}`;
+      fotoUrl = await uploadFotoSupabase(fotoInput.files[0], caminho);
+    }catch(e){
+      toast('Erro ao enviar a foto — prato salvo sem foto');
+    }
+  }
+
+  CARDAPIO_HOJE.push({ nome, descricao: desc, categoria, foto: fotoUrl, esgotado: false });
+  await salvarCardapioHoje();
+  fecharModal();
+  toast('Prato adicionado!');
+};
+
+/* ---------- Render: lado Funcionário ---------- */
+function renderizarCardapioFuncionario(){
+  const box = document.getElementById('lista-cardapio-funcionario');
+  if(!box) return;
+
+  const disponiveis = CARDAPIO_HOJE;
+  if(disponiveis.length === 0){
+    box.innerHTML = `<div class="vazio"><span class="em">🕐</span>O cardápio de hoje ainda não foi publicado.<br>Volte em instantes.</div>`;
+    return;
+  }
+
+  if(PEDIDO_ATUAL){
+    const prato = disponiveis.find(p => p.nome === PEDIDO_ATUAL.pratoNome) || { nome: PEDIDO_ATUAL.pratoNome };
+    box.innerHTML = `
+      <div class="confirmacao-box">
+        <div class="selo">✅</div>
+        <h2>Pedido confirmado!</h2>
+        <p>Você escolheu: <b>${prato.nome}</b></p>
+      </div>
+      <button class="btn btn-fantasma btn-bloco" style="margin-top:14px;" onclick="trocarPedido()">Trocar de prato</button>
+      ${CONFIG.campoSugestoes ? renderizarBlocoSugestao() : ''}
+    `;
+    return;
+  }
+
+  box.innerHTML = disponiveis.map((p, i) => `
+    <div class="prato-escolha ${p.esgotado ? 'esgotado' : ''}" onclick="${p.esgotado ? '' : `escolherPrato(${i})`}">
+      <div class="foto-grande" style="${p.foto ? `background-image:url('${p.foto}')` : ''}">${p.foto ? '' : '🍽️'}</div>
+      <p class="nome serif">${p.nome}</p>
+      <p class="desc">${p.descricao || ''}</p>
+      <div class="rodape-escolha">
+        <span class="tagzinha">${p.esgotado ? 'Esgotado' : (p.categoria || 'Prato')}</span>
+        <div class="radio-fake"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderizarBlocoSugestao(){
+  return `
+    <div style="margin-top:22px;">
+      <label class="rotulo">Sugestões para melhorar</label>
+      <textarea class="campo" id="campo-sugestao" rows="3" placeholder="O que podemos fazer melhor?"></textarea>
+      <button class="btn btn-amber btn-bloco" onclick="enviarSugestao()">Enviar sugestão</button>
+    </div>`;
+}
+
+window.escolherPrato = async (i) => {
+  const prato = CARDAPIO_HOJE[i];
+  const pedido = {
+    data: hojeISO(),
+    pratoNome: prato.nome,
+    funcionarioNome: FUNCIONARIO.nome,
+    empresaCodigo: FUNCIONARIO.empresaCodigo || null,
+    empresaNome: FUNCIONARIO.empresaNome || null,
+    presencaConfirmada: !CONFIG.confirmarPresenca, // se não usa presença, já conta como ok
+    criadoEm: serverTimestamp()
+  };
+  const ref = await addDoc(collection(db, PREFIXO+"pedidos"), pedido);
+  PEDIDO_ATUAL = { id: ref.id, ...pedido };
+  localStorage.setItem('refeitorio_pedido_'+hojeISO(), JSON.stringify(PEDIDO_ATUAL));
+  renderizarCardapioFuncionario();
+  toast('Pedido registrado!');
+};
+
+window.trocarPedido = async () => {
+  if(PEDIDO_ATUAL?.id){
+    await deleteDoc(doc(db, PREFIXO+"pedidos", PEDIDO_ATUAL.id));
+  }
+  PEDIDO_ATUAL = null;
+  localStorage.removeItem('refeitorio_pedido_'+hojeISO());
+  renderizarCardapioFuncionario();
+};
+
+window.enviarSugestao = async () => {
+  const texto = document.getElementById('campo-sugestao').value.trim();
+  if(!texto) return;
+  await addDoc(collection(db, PREFIXO+"sugestoes"), {
+    texto, funcionarioNome: FUNCIONARIO.nome, data: hojeISO(), criadoEm: serverTimestamp()
+  });
+  toast('Sugestão enviada, obrigado!');
+  document.getElementById('campo-sugestao').value = '';
+};
+
+/* checa se esse funcionário já tem pedido salvo localmente hoje */
+function checarPedidoLocal(){
+  const salvo = localStorage.getItem('refeitorio_pedido_'+hojeISO());
+  if(salvo) PEDIDO_ATUAL = JSON.parse(salvo);
+}
+checarPedidoLocal();
+
+/* ============================================================
+   PEDIDOS DE HOJE — TEMPO REAL (pro relatório do gerente)
+   ============================================================ */
+function escutarPedidosHoje(){
+  const q = query(collection(db, PREFIXO+"pedidos"), where("data","==", hojeISO()));
+  onSnapshot(q, (snap)=>{
+    PEDIDOS_HOJE = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    if(TAB_GERENTE_ATIVA === 'relatorio') renderizarRelatorio();
+  });
+}
+
+function renderizarRelatorio(){
+  const box = document.getElementById('painel-relatorio');
+  const total = PEDIDOS_HOJE.length;
+
+  const contagemPratos = {};
+  PEDIDOS_HOJE.forEach(p => contagemPratos[p.pratoNome] = (contagemPratos[p.pratoNome]||0)+1);
+  const maiorPrato = Math.max(1, ...Object.values(contagemPratos));
+
+  const contagemEmpresas = {};
+  PEDIDOS_HOJE.forEach(p => {
+    const nome = p.empresaNome || 'Não informado';
+    contagemEmpresas[nome] = (contagemEmpresas[nome]||0)+1;
+  });
+
+  box.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-box"><div class="num">${total}</div><div class="lbl">Pedidos hoje</div></div>
+      <div class="stat-box"><div class="num">${Object.keys(contagemPratos).length}</div><div class="lbl">Pratos pedidos</div></div>
+    </div>
+    <label class="rotulo">Por prato</label>
+    ${Object.entries(contagemPratos).map(([nome,qtd])=>`
+      <div class="barra-item">
+        <div class="nome">${nome}</div>
+        <div class="barra-fundo"><div class="barra-preenchida" style="width:${(qtd/maiorPrato)*100}%"></div></div>
+        <div class="qtd">${qtd}</div>
+      </div>`).join('') || '<p style="color:var(--ink-soft);font-size:13px;">Nenhum pedido ainda.</p>'}
+
+    ${Object.keys(contagemEmpresas).length ? `
+      <label class="rotulo" style="margin-top:20px;">Por empresa</label>
+      ${Object.entries(contagemEmpresas).map(([nome,qtd])=>`
+        <div class="barra-item">
+          <div class="nome">${nome}</div>
+          <div class="barra-fundo"><div class="barra-preenchida" style="width:${(qtd/total)*100}%"></div></div>
+          <div class="qtd">${qtd}</div>
+        </div>`).join('')}
+    ` : ''}
+  `;
+}
+
+/* ============================================================
+   TABS DO GERENTE
+   ============================================================ */
+window.trocarTabGerente = (tab) => {
+  TAB_GERENTE_ATIVA = tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('ativa', t.dataset.tab===tab));
+  document.getElementById('painel-cardapio').classList.toggle('hide', tab!=='cardapio');
+  document.getElementById('painel-relatorio').classList.toggle('hide', tab!=='relatorio');
+  document.getElementById('painel-config').classList.toggle('hide', tab!=='config');
+  document.getElementById('barra-add-prato').classList.toggle('hide', tab!=='cardapio');
+  if(tab==='relatorio') renderizarRelatorio();
+  if(tab==='config') renderizarConfig();
+};
+
+/* ============================================================
+   CONFIGURAÇÕES
+   ============================================================ */
+function renderizarConfig(){
+  const box = document.getElementById('painel-config');
+  box.innerHTML = `
+    <label class="rotulo">Como identificar o funcionário</label>
+    <div class="chip-select" id="cfg-identificacao">
+      ${[
+        {v:'nome_empresa', l:'Nome + empresa'},
+        {v:'matricula', l:'Nome + matrícula'},
+        {v:'telefone', l:'Telefone (WhatsApp)'}
+      ].map(o=>`<button type="button" class="chip ${CONFIG.identificacao===o.v?'ativo':''}" data-v="${o.v}" onclick="setIdentificacao('${o.v}')">${o.l}</button>`).join('')}
+    </div>
+
+    <label class="rotulo">Formas de pagamento aceitas</label>
+    <div class="chip-select" id="cfg-pagamentos">
+      ${[
+        {v:'fatura_empresa', l:'Fatura mensal p/ empresa'},
+        {v:'pix_dinheiro', l:'PIX / dinheiro no balcão'},
+        {v:'vr_va', l:'Vale-refeição (VR/VA)'}
+      ].map(o=>`<button type="button" class="chip ${CONFIG.pagamentos.includes(o.v)?'ativo':''}" data-v="${o.v}" onclick="alternarPagamento('${o.v}')">${o.l}</button>`).join('')}
+    </div>
+
+    <div class="linha-config">
+      <div class="txt"><b>Confirmar presença</b><span>Funcionário confirma que vai almoçar, além do prato</span></div>
+      <div class="switch ${CONFIG.confirmarPresenca?'on':''}" onclick="alternarConfig('confirmarPresenca')"><div class="bolinha"></div></div>
+    </div>
+    <div class="linha-config">
+      <div class="txt"><b>Avaliação pós-almoço</b><span>Carinhas de satisfação depois do pedido</span></div>
+      <div class="switch ${CONFIG.feedbackPosAlmoco?'on':''}" onclick="alternarConfig('feedbackPosAlmoco')"><div class="bolinha"></div></div>
+    </div>
+    <div class="linha-config">
+      <div class="txt"><b>Campo de sugestões</b><span>Funcionário pode sugerir melhorias a qualquer momento</span></div>
+      <div class="switch ${CONFIG.campoSugestoes?'on':''}" onclick="alternarConfig('campoSugestoes')"><div class="bolinha"></div></div>
+    </div>
+
+    <label class="rotulo" style="margin-top:22px;">Empresas atendidas</label>
+    <div id="lista-empresas">
+      ${CONFIG.empresas.map((e,i)=>`
+        <div class="prato-card" style="align-items:center;">
+          <div class="prato-info"><p class="nome" style="font-size:14.5px;">${e.nome}</p></div>
+          <button class="mini-btn" onclick="removerEmpresa(${i})">🗑️</button>
+        </div>`).join('')}
+    </div>
+    <button class="btn btn-fantasma btn-bloco" onclick="adicionarEmpresa()">+ Adicionar empresa</button>
+  `;
+}
+
+window.setIdentificacao = async (v) => { CONFIG.identificacao = v; await salvarConfig(); renderizarConfig(); };
+window.alternarPagamento = async (v) => {
+  const idx = CONFIG.pagamentos.indexOf(v);
+  if(idx>-1) CONFIG.pagamentos.splice(idx,1); else CONFIG.pagamentos.push(v);
+  if(CONFIG.pagamentos.length===0) CONFIG.pagamentos=['fatura_empresa'];
+  await salvarConfig(); renderizarConfig();
+};
+window.alternarConfig = async (chave) => { CONFIG[chave] = !CONFIG[chave]; await salvarConfig(); renderizarConfig(); };
+window.adicionarEmpresa = async () => {
+  const nome = prompt('Nome da empresa:');
+  if(!nome) return;
+  CONFIG.empresas.push({ codigo: 'emp'+Date.now(), nome });
+  await salvarConfig(); renderizarConfig();
+};
+window.removerEmpresa = async (i) => {
+  CONFIG.empresas.splice(i,1);
+  await salvarConfig(); renderizarConfig();
+};
+
+/* ============================================================
+   PWA — instalação e service worker
+   ============================================================ */
+let promptInstalacao = null;
+function configurarInstalacaoPWA(){
+  window.addEventListener('beforeinstallprompt', (e)=>{
+    e.preventDefault();
+    promptInstalacao = e;
+    if(!localStorage.getItem('refeitorio_banner_fechado')){
+      document.getElementById('banner-instalar').classList.remove('hide');
+    }
+  });
+  const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+  const jaInstalado = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if(isIOS && !jaInstalado && !localStorage.getItem('refeitorio_banner_fechado')){
+    document.getElementById('banner-instalar').classList.remove('hide');
+  }
+}
+window.instalarPWA = async () => {
+  if(promptInstalacao){
+    promptInstalacao.prompt();
+    await promptInstalacao.userChoice;
+    promptInstalacao = null;
+    fecharBannerInstalar();
+  } else {
+    toast('No iPhone: toque em Compartilhar e depois em "Adicionar à Tela de Início"');
+  }
+};
+window.fecharBannerInstalar = () => {
+  document.getElementById('banner-instalar').classList.add('hide');
+  localStorage.setItem('refeitorio_banner_fechado', '1');
+};
+function registrarServiceWorker(){
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  }
+}
+</script>
+</body>
+</html>
