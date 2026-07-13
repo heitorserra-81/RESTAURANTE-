@@ -14,18 +14,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#FAF7F0;
+    --bg:#F8F1E3;
     --paper:#FFFFFF;
-    --ink:#241F1B;
-    --ink-soft:#6B6459;
-    --pine:#2C4A3B;
-    --pine-dark:#1D332A;
-    --amber:#E3A857;
-    --amber-dark:#C98B36;
-    --tomato:#C1443C;
-    --line:#E8E1D3;
+    --ink:#241611;
+    --ink-soft:#7A6558;
+    --pine:#591A1B;
+    --pine-dark:#3D1112;
+    --amber:#C9A227;
+    --amber-dark:#A6841C;
+    --tomato:#A32B2B;
+    --line:#EADFC7;
     --radius:18px;
-    --shadow:0 8px 24px rgba(36,31,27,.08);
+    --shadow:0 8px 24px rgba(36,22,17,.1);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--ink);
@@ -43,6 +43,10 @@
   #tela-splash p{opacity:.75;font-size:14px;margin:0;}
   .prato-icone{width:64px;height:64px;border-radius:50%;border:3px solid var(--amber);
     display:flex;align-items:center;justify-content:center;font-size:30px;background:rgba(255,255,255,.06);}
+  .logo-splash{width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--amber);
+    margin-bottom:16px;box-shadow:0 8px 24px rgba(0,0,0,.35);}
+  .logo-marca{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid var(--amber);
+    margin:0 auto 14px;display:block;box-shadow:var(--shadow);}
 
   /* ---------- Topbar ---------- */
   .topbar{position:sticky;top:0;z-index:20;background:var(--bg);padding:18px 20px 12px;
@@ -194,9 +198,9 @@
 <body>
 
 <div id="tela-splash">
-  <div class="prato-icone">🍽️</div>
+  <img src="logo.png" alt="Marchesini di Roverbella" class="logo-splash">
   <h1>Refeitório do Dia</h1>
-  <p>Carregando…</p>
+  <p id="txt-splash">Carregando…</p>
 </div>
 
 <div class="app hide" id="app">
@@ -204,7 +208,7 @@
   <!-- ===================== SELEÇÃO DE PERFIL ===================== -->
   <div id="tela-perfil" class="tela-centro hide">
     <div class="marca">
-      <div class="prato-icone">🍽️</div>
+      <img src="logo.png" alt="Marchesini di Roverbella" class="logo-marca">
       <h1>Refeitório do Dia</h1>
       <p>Escolha como deseja entrar</p>
     </div>
@@ -404,30 +408,52 @@ async function salvarConfig(){
    INICIALIZAÇÃO
    ============================================================ */
 async function iniciar(){
-  await carregarConfig();
-  escutarCardapioHoje();
-  escutarPedidosHoje();
+  const txtSplash = document.getElementById('txt-splash');
+  // se em 8s ainda não saiu da splash, avisa que algo travou (config do Firebase, internet, etc.)
+  const alarmeTravado = setTimeout(()=>{
+    txtSplash.innerHTML = 'Demorando mais que o normal…<br>Verifique sua internet ou se o firebaseConfig foi preenchido.';
+  }, 8000);
 
-  document.getElementById('data-hoje-func').textContent = dataFormatada();
-  document.getElementById('data-hoje-gerente').textContent = dataFormatada();
+  try{
+    await carregarConfig();
+    escutarCardapioHoje();
+    escutarPedidosHoje();
 
-  document.getElementById('tela-splash').style.opacity = '0';
-  setTimeout(()=>{
-    document.getElementById('tela-splash').classList.add('hide');
-    document.getElementById('app').classList.remove('hide');
-    const salvo = localStorage.getItem('refeitorio_funcionario');
-    if(salvo){
-      FUNCIONARIO = JSON.parse(salvo);
-      mostrarTela('tela-funcionario');
-    } else {
-      mostrarTela('tela-perfil');
-    }
-  }, 400);
+    document.getElementById('data-hoje-func').textContent = dataFormatada();
+    document.getElementById('data-hoje-gerente').textContent = dataFormatada();
 
-  configurarInstalacaoPWA();
-  registrarServiceWorker();
+    clearTimeout(alarmeTravado);
+    document.getElementById('tela-splash').style.opacity = '0';
+    setTimeout(()=>{
+      document.getElementById('tela-splash').classList.add('hide');
+      document.getElementById('app').classList.remove('hide');
+      const salvo = localStorage.getItem('refeitorio_funcionario');
+      if(salvo){
+        FUNCIONARIO = JSON.parse(salvo);
+        mostrarTela('tela-funcionario');
+      } else {
+        mostrarTela('tela-perfil');
+      }
+    }, 400);
+
+    configurarInstalacaoPWA();
+    registrarServiceWorker();
+  }catch(erro){
+    clearTimeout(alarmeTravado);
+    console.error('Erro ao iniciar o app:', erro);
+    txtSplash.innerHTML = `Não consegui conectar.<br><span style="opacity:.85">${erro.message || erro}</span><br><br>Confira o firebaseConfig no início do código.`;
+  }
 }
 window.mostrarTela = mostrarTela;
+
+// captura qualquer erro fora do try/catch (ex: erro de sintaxe em outra parte do módulo)
+window.addEventListener('unhandledrejection', (e)=>{
+  const txtSplash = document.getElementById('txt-splash');
+  if(txtSplash && document.getElementById('app').classList.contains('hide')){
+    txtSplash.innerHTML = `Erro inesperado.<br><span style="opacity:.85">${e.reason?.message || e.reason}</span>`;
+  }
+});
+
 iniciar();
 
 /* ============================================================
