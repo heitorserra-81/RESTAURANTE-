@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Refeitório">
-<link rel="apple-touch-icon" href="logo.png">
+<link rel="apple-touch-icon" href="IMG_1616.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -198,7 +198,7 @@
 <body>
 
 <div id="tela-splash">
-  <img src="logo.png" alt="Marchesini di Roverbella" class="logo-splash" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27200%27 height=%27200%27%3E%3Ccircle cx=%27100%27 cy=%27100%27 r=%2795%27 fill=%27%236B1A1A%27 stroke=%27%23C9A84C%27 stroke-width=%276%27/%3E%3Ctext x=%2750%25%27 y=%2762%25%27 font-size=%2790%27 text-anchor=%27middle%27%3E%F0%9F%8D%BD%3C/text%3E%3C/svg%3E'">
+  <img src="IMG_1616.png" alt="Marchesini di Roverbella" class="logo-splash" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27200%27 height=%27200%27%3E%3Ccircle cx=%27100%27 cy=%27100%27 r=%2795%27 fill=%27%236B1A1A%27 stroke=%27%23C9A84C%27 stroke-width=%276%27/%3E%3Ctext x=%2750%25%27 y=%2762%25%27 font-size=%2790%27 text-anchor=%27middle%27%3E%F0%9F%8D%BD%3C/text%3E%3C/svg%3E'">
   <h1>Refeitório do Dia</h1>
   <p id="txt-splash">Carregando…</p>
 </div>
@@ -208,7 +208,7 @@
   <!-- ===================== SELEÇÃO DE PERFIL ===================== -->
   <div id="tela-perfil" class="tela-centro hide">
     <div class="marca">
-      <img src="logo.png" alt="Marchesini di Roverbella" class="logo-marca" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27200%27 height=%27200%27%3E%3Ccircle cx=%27100%27 cy=%27100%27 r=%2795%27 fill=%27%236B1A1A%27 stroke=%27%23C9A84C%27 stroke-width=%276%27/%3E%3Ctext x=%2750%25%27 y=%2762%25%27 font-size=%2790%27 text-anchor=%27middle%27%3E%F0%9F%8D%BD%3C/text%3E%3C/svg%3E'">
+      <img src="IMG_1616.png" alt="Marchesini di Roverbella" class="logo-marca" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27200%27 height=%27200%27%3E%3Ccircle cx=%27100%27 cy=%27100%27 r=%2795%27 fill=%27%236B1A1A%27 stroke=%27%23C9A84C%27 stroke-width=%276%27/%3E%3Ctext x=%2750%25%27 y=%2762%25%27 font-size=%2790%27 text-anchor=%27middle%27%3E%F0%9F%8D%BD%3C/text%3E%3C/svg%3E'">
       <h1>Refeitório do Dia</h1>
       <p>Escolha como deseja entrar</p>
     </div>
@@ -271,15 +271,19 @@
     <div class="tabs">
       <button class="tab ativa" data-tab="cardapio" onclick="trocarTabGerente('cardapio')">Cardápio</button>
       <button class="tab" data-tab="relatorio" onclick="trocarTabGerente('relatorio')">Relatório</button>
+      <button class="tab" data-tab="equipe" onclick="trocarTabGerente('equipe')">Equipe</button>
       <button class="tab" data-tab="config" onclick="trocarTabGerente('config')">Configurações</button>
     </div>
 
     <div class="conteudo" id="painel-cardapio">
-      <button class="btn btn-fantasma btn-bloco" style="margin-bottom:14px;" onclick="copiarCardapioOntem()">↺ Copiar cardápio de ontem</button>
+      <button class="btn btn-fantasma btn-bloco" style="margin-bottom:10px;" onclick="copiarCardapioOntem()">↺ Copiar cardápio de ontem</button>
+      <button class="btn btn-amber btn-bloco" style="margin-bottom:14px;" onclick="abrirModalCardapioIA()">🪄 Cardápio completo por IA</button>
       <div id="lista-pratos-gerente"></div>
     </div>
 
     <div class="conteudo hide" id="painel-relatorio"></div>
+
+    <div class="conteudo hide" id="painel-equipe"></div>
 
     <div class="conteudo hide" id="painel-config"></div>
 
@@ -400,6 +404,13 @@ const CONFIG_PADRAO = {
   notificacoesPublicacao: false,
   iaAtivada: false,
   iaApiKey: "",
+  fotoFuncionario: false,
+  iaCampos: {
+    categoria: true,
+    vegetariano: false,
+    alergenos: false,
+    porcaoSugerida: false
+  },
   empresas: [
     { codigo: "emp1", nome: "Empresa Exemplo Ltda" }
   ]
@@ -524,10 +535,14 @@ function montarCamposIdentificacao(){
     html += `<label class="rotulo">WhatsApp</label>
       <input class="campo" id="id-telefone" inputmode="numeric" placeholder="(19) 90000-0000">`;
   }
+  if(CONFIG.fotoFuncionario){
+    html += `<label class="rotulo">Sua foto</label>
+      <input type="file" accept="image/*" class="campo" id="id-foto">`;
+  }
   box.innerHTML = html;
 }
 
-window.salvarIdentificacao = () => {
+window.salvarIdentificacao = async () => {
   const nome = document.getElementById('id-nome').value.trim();
   if(!nome){ toast('Digite seu nome'); return; }
 
@@ -544,11 +559,40 @@ window.salvarIdentificacao = () => {
     dados.telefone = document.getElementById('id-telefone').value.trim();
   }
 
+  if(CONFIG.fotoFuncionario){
+    const fotoInput = document.getElementById('id-foto');
+    if(fotoInput?.files[0]){
+      try{
+        toast('Enviando foto…');
+        const caminho = `funcionarios/${Date.now()}_${fotoInput.files[0].name}`;
+        dados.foto = await uploadFotoSupabase(fotoInput.files[0], caminho);
+      }catch(e){
+        toast('Erro ao enviar a foto — continuando sem foto');
+      }
+    }
+  }
+
   FUNCIONARIO = dados;
   localStorage.setItem('refeitorio_funcionario', JSON.stringify(dados));
+  await salvarFuncionarioNaEquipe(dados);
   mostrarTela('tela-funcionario');
   renderizarSaudacao();
 };
+
+function idDispositivoFuncionario(){
+  let id = localStorage.getItem('refeitorio_funcionario_id');
+  if(!id){
+    id = 'f' + Date.now() + Math.floor(Math.random()*10000);
+    localStorage.setItem('refeitorio_funcionario_id', id);
+  }
+  return id;
+}
+
+async function salvarFuncionarioNaEquipe(dados){
+  const id = idDispositivoFuncionario();
+  const ref = doc(db, PREFIXO+"funcionarios", id);
+  await setDoc(ref, { ...dados, atualizadoEm: serverTimestamp() }, { merge:true });
+}
 
 window.abrirMenuFuncionario = () => {
   if(confirm('Trocar de funcionário / sair deste perfil?')){
@@ -611,6 +655,8 @@ function renderizarPratosGerente(){
         <p class="desc">${p.descricao || ''}</p>
         <div class="prato-tags">
           <span class="tagzinha">${p.categoria || 'Prato'}</span>
+          ${p.vegetariano ? `<span class="tagzinha">🌱 Vegetariano</span>` : ''}
+          ${p.alergenos ? `<span class="tagzinha">⚠️ ${p.alergenos}</span>` : ''}
           ${p.esgotado ? `<span class="tagzinha esgotado">Esgotado</span>` : ''}
           ${CONFIG.controlePorcoes && p.quantidadeTotal ? `<span class="tagzinha">${contarPedidosDoPrato(p.nome)}/${p.quantidadeTotal} porções</span>` : ''}
         </div>
@@ -644,7 +690,7 @@ window.abrirModalPrato = (indiceEdicao) => {
       <div class="modal">
         <div class="modal-titulo"><h3>${editando ? 'Editar prato' : 'Novo prato'}</h3><button class="icon-btn" onclick="fecharModal()">✕</button></div>
         <label class="rotulo">Foto do prato</label>
-        <input type="file" accept="image/*" capture="environment" class="campo" id="np-foto">
+        <input type="file" accept="image/*" class="campo" id="np-foto">
         ${CONFIG.iaAtivada ? `<button type="button" class="btn btn-fantasma btn-bloco" style="margin-bottom:10px;" onclick="preencherComIA()">🪄 Preencher com IA a partir da foto</button>
         <p id="ia-status" style="font-size:12px;color:var(--ink-soft);margin:-4px 0 10px;"></p>` : ''}
         <label class="rotulo">Nome do prato</label>
@@ -660,6 +706,20 @@ window.abrirModalPrato = (indiceEdicao) => {
         ${CONFIG.controlePorcoes ? `
           <label class="rotulo">Quantidade de porções disponíveis</label>
           <input type="number" inputmode="numeric" class="campo" id="np-qtd" placeholder="0 = ilimitado" value="${p?.quantidadeTotal || ''}">
+        ` : ''}
+        ${CONFIG.iaCampos.vegetariano ? `
+          <div class="linha-config" style="border:none;padding:8px 0;">
+            <div class="txt"><b>Vegetariano</b></div>
+            <div class="switch ${p?.vegetariano?'on':''}" id="np-vegetariano-switch" onclick="this.classList.toggle('on')"><div class="bolinha"></div></div>
+          </div>
+        ` : ''}
+        ${CONFIG.iaCampos.alergenos ? `
+          <label class="rotulo">Alérgenos</label>
+          <input class="campo" id="np-alergenos" placeholder="Ex: contém glúten, leite" value="${p?.alergenos || ''}">
+        ` : ''}
+        ${CONFIG.iaCampos.porcaoSugerida ? `
+          <label class="rotulo">Porção sugerida</label>
+          <input class="campo" id="np-porcao" placeholder="Ex: 200g" value="${p?.porcaoSugerida || ''}">
         ` : ''}
         <div style="margin-top:18px;">
           <button class="btn btn-primario btn-bloco" onclick="confirmarPrato(${editando ? indiceEdicao : 'null'})">${editando ? 'Salvar alterações' : 'Adicionar ao cardápio de hoje'}</button>
@@ -696,7 +756,13 @@ window.confirmarPrato = async (indiceEdicao) => {
     }
   }
 
-  const dadosPrato = { nome, descricao: desc, categoria, foto: fotoUrl, quantidadeTotal, esgotado: editando ? CARDAPIO_HOJE[indiceEdicao].esgotado : false };
+  const dadosPrato = {
+    nome, descricao: desc, categoria, foto: fotoUrl, quantidadeTotal,
+    esgotado: editando ? CARDAPIO_HOJE[indiceEdicao].esgotado : false,
+    vegetariano: CONFIG.iaCampos.vegetariano ? !!document.getElementById('np-vegetariano-switch')?.classList.contains('on') : false,
+    alergenos: CONFIG.iaCampos.alergenos ? (document.getElementById('np-alergenos')?.value.trim() || '') : '',
+    porcaoSugerida: CONFIG.iaCampos.porcaoSugerida ? (document.getElementById('np-porcao')?.value.trim() || '') : ''
+  };
 
   if(editando){
     CARDAPIO_HOJE[indiceEdicao] = dadosPrato;
@@ -724,6 +790,91 @@ window.copiarCardapioOntem = async () => {
   toast('Cardápio de ontem copiado!');
 };
 
+/* ---------- Cardápio completo por IA (fluxo manual: gera prompt → cola código) ---------- */
+function montarPromptCardapioCompleto(){
+  const formato = montarFormatoJsonPrato();
+  return `Veja a(s) foto(s) do cardápio de hoje do restaurante (pode ser foto de cada prato, ou de um quadro/papel com a lista escrita à mão). Identifique TODOS os pratos disponíveis hoje e devolva SOMENTE um array JSON, sem markdown, sem texto antes ou depois, no formato:
+[${formato}, ${formato}, ...]
+
+Um objeto desses para cada prato que você identificar na(s) foto(s). Regras:
+- "nome": nome curto e claro do prato
+- "descricao": acompanhamentos/ingredientes principais, de forma resumida
+${CONFIG.iaCampos.categoria ? '- "categoria": escolha uma entre Prato principal, Vegetariano, Acompanhamento, Salada, Sobremesa' : ''}
+${CONFIG.iaCampos.vegetariano ? '- "vegetariano": true ou false' : ''}
+${CONFIG.iaCampos.alergenos ? '- "alergenos": alérgenos comuns identificáveis (ou string vazia se não souber)' : ''}
+${CONFIG.iaCampos.porcaoSugerida ? '- "porcaoSugerida": estimativa de porção, ex: "200g" (ou string vazia se não souber)' : ''}
+
+Responda só com o array JSON, nada mais.`;
+}
+
+window.abrirModalCardapioIA = () => {
+  const raiz = document.getElementById('raiz-modal');
+  const prompt = montarPromptCardapioCompleto();
+  raiz.innerHTML = `
+    <div class="overlay" onclick="if(event.target===this) fecharModal()">
+      <div class="modal">
+        <div class="modal-titulo"><h3>Cardápio completo por IA</h3><button class="icon-btn" onclick="fecharModal()">✕</button></div>
+        <p style="font-size:13px;color:var(--ink-soft);line-height:1.5;margin-bottom:14px;">
+          1. Copie o prompt abaixo.<br>
+          2. Cole numa IA (Claude, ChatGPT etc.) e anexe a(s) foto(s) do cardápio de hoje.<br>
+          3. Copie o código que a IA devolver e cole no campo abaixo.<br>
+          4. O app cria todos os pratos de uma vez — só falta adicionar a foto de cada um depois.
+        </p>
+        <label class="rotulo">Prompt pronto</label>
+        <textarea class="campo" id="ia-prompt-texto" rows="6" readonly style="font-size:12.5px;">${prompt}</textarea>
+        <button class="btn btn-fantasma btn-bloco" onclick="copiarPromptIA()">📋 Copiar prompt</button>
+
+        <label class="rotulo" style="margin-top:18px;">Cole aqui o código que a IA devolveu</label>
+        <textarea class="campo" id="ia-codigo-colado" rows="6" placeholder='[{"nome":"...","descricao":"..."}, ...]'></textarea>
+        <p id="ia-cardapio-status" style="font-size:12px;color:var(--ink-soft);margin:-4px 0 10px;"></p>
+        <button class="btn btn-primario btn-bloco" onclick="criarCardapioDoCodigo()">Criar cardápio a partir do código</button>
+      </div>
+    </div>`;
+};
+
+window.copiarPromptIA = () => {
+  const el = document.getElementById('ia-prompt-texto');
+  el.select();
+  el.setSelectionRange(0, 999999);
+  try{
+    document.execCommand('copy');
+    toast('Prompt copiado!');
+  }catch(e){
+    navigator.clipboard?.writeText(el.value).then(()=>toast('Prompt copiado!')).catch(()=>toast('Selecione e copie manualmente'));
+  }
+};
+
+window.criarCardapioDoCodigo = async () => {
+  const statusEl = document.getElementById('ia-cardapio-status');
+  const bruto = document.getElementById('ia-codigo-colado').value.trim();
+  if(!bruto){ toast('Cole o código primeiro'); return; }
+  try{
+    const limpo = bruto.replace(/```json|```/g,'').trim();
+    const lista = JSON.parse(limpo);
+    if(!Array.isArray(lista) || lista.length===0) throw new Error('O código não é uma lista de pratos');
+
+    const novosPratos = lista.map(item => ({
+      nome: item.nome || 'Prato sem nome',
+      descricao: item.descricao || '',
+      categoria: item.categoria || 'Prato principal',
+      foto: '',
+      quantidadeTotal: 0,
+      esgotado: false,
+      vegetariano: !!item.vegetariano,
+      alergenos: item.alergenos || '',
+      porcaoSugerida: item.porcaoSugerida || ''
+    }));
+
+    CARDAPIO_HOJE = [...CARDAPIO_HOJE, ...novosPratos];
+    await salvarCardapioHoje();
+    fecharModal();
+    toast(`${novosPratos.length} pratos criados! Falta só adicionar as fotos.`);
+  }catch(e){
+    console.error(e);
+    statusEl.textContent = 'Não consegui ler esse código: ' + (e.message||e);
+  }
+};
+
 function arquivoParaBase64(file){
   return new Promise((resolve, reject) => {
     const leitor = new FileReader();
@@ -742,6 +893,7 @@ window.preencherComIA = async () => {
   statusEl.textContent = 'Analisando a foto…';
   try{
     const base64 = await arquivoParaBase64(fotoInput.files[0]);
+    const formato = montarFormatoJsonPrato();
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -757,7 +909,7 @@ window.preencherComIA = async () => {
           role: 'user',
           content: [
             { type: 'image', source: { type: 'base64', media_type: fotoInput.files[0].type, data: base64 } },
-            { type: 'text', text: 'Veja esta foto de um prato de restaurante (pode ser o prato pronto ou um papel/quadro com a descrição escrita). Responda SOMENTE com um JSON, sem markdown, sem texto antes ou depois, no formato: {"nome":"...","descricao":"...","categoria":"Prato principal|Vegetariano|Acompanhamento|Salada|Sobremesa"}. A descrição deve listar os acompanhamentos de forma curta.' }
+            { type: 'text', text: `Veja esta foto de um prato de restaurante (pode ser o prato pronto ou um papel/quadro com a descrição escrita). Responda SOMENTE com um JSON, sem markdown, sem texto antes ou depois, no formato: ${formato}` }
           ]
         }]
       })
@@ -775,12 +927,31 @@ window.preencherComIA = async () => {
         c.classList.toggle('ativo', c.dataset.cat === resultado.categoria);
       });
     }
+    if(CONFIG.iaCampos.vegetariano && document.getElementById('np-vegetariano-switch')){
+      document.getElementById('np-vegetariano-switch').classList.toggle('on', !!resultado.vegetariano);
+    }
+    if(CONFIG.iaCampos.alergenos && document.getElementById('np-alergenos')){
+      document.getElementById('np-alergenos').value = resultado.alergenos || '';
+    }
+    if(CONFIG.iaCampos.porcaoSugerida && document.getElementById('np-porcao')){
+      document.getElementById('np-porcao').value = resultado.porcaoSugerida || '';
+    }
     statusEl.textContent = 'Preenchido! Confira antes de salvar.';
   }catch(e){
     console.error(e);
     statusEl.textContent = 'Não consegui analisar a foto: ' + (e.message||e);
   }
 };
+
+/* monta a estrutura de campos do JSON conforme o que está habilitado nas Configurações */
+function montarFormatoJsonPrato(){
+  let campos = `"nome":"...","descricao":"..."`;
+  if(CONFIG.iaCampos.categoria) campos += `,"categoria":"Prato principal|Vegetariano|Acompanhamento|Salada|Sobremesa"`;
+  if(CONFIG.iaCampos.vegetariano) campos += `,"vegetariano":true|false`;
+  if(CONFIG.iaCampos.alergenos) campos += `,"alergenos":"..."`;
+  if(CONFIG.iaCampos.porcaoSugerida) campos += `,"porcaoSugerida":"..."`;
+  return `{${campos}}`;
+}
 
 /* ---------- Render: lado Funcionário ---------- */
 function renderizarCardapioFuncionario(){
@@ -823,6 +994,12 @@ function renderizarCardapioFuncionario(){
         <span class="tagzinha">${p.esgotado ? 'Esgotado' : (p.categoria || 'Prato')}</span>
         <div class="radio-fake"></div>
       </div>
+      ${(p.vegetariano || p.alergenos || p.porcaoSugerida) ? `
+      <div class="prato-tags" style="margin-top:8px;">
+        ${p.vegetariano ? `<span class="tagzinha">🌱 Vegetariano</span>` : ''}
+        ${p.alergenos ? `<span class="tagzinha">⚠️ ${p.alergenos}</span>` : ''}
+        ${p.porcaoSugerida ? `<span class="tagzinha">${p.porcaoSugerida}</span>` : ''}
+      </div>` : ''}
     </div>
   `).join('');
 }
@@ -1015,9 +1192,11 @@ window.trocarTabGerente = (tab) => {
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('ativa', t.dataset.tab===tab));
   document.getElementById('painel-cardapio').classList.toggle('hide', tab!=='cardapio');
   document.getElementById('painel-relatorio').classList.toggle('hide', tab!=='relatorio');
+  document.getElementById('painel-equipe').classList.toggle('hide', tab!=='equipe');
   document.getElementById('painel-config').classList.toggle('hide', tab!=='config');
   document.getElementById('barra-add-prato').classList.toggle('hide', tab!=='cardapio');
   if(tab==='relatorio') renderizarRelatorio();
+  if(tab==='equipe') renderizarEquipe();
   if(tab==='config') renderizarConfig();
 };
 
@@ -1083,7 +1262,20 @@ function renderizarConfig(){
       <label class="rotulo">Chave da API (Anthropic)</label>
       <input class="campo" id="cfg-ia-key" placeholder="sk-ant-..." value="${CONFIG.iaApiKey||''}" onchange="salvarChaveIA()">
       <p style="font-size:11.5px;color:var(--ink-soft);margin:-6px 0 10px;">Gerada em console.anthropic.com — fica salva só no seu Firestore.</p>
+
+      <label class="rotulo">Campos que a IA deve preencher</label>
+      <div class="chip-select">
+        <button type="button" class="chip ${CONFIG.iaCampos.categoria?'ativo':''}" onclick="alternarCampoIA('categoria')">Categoria</button>
+        <button type="button" class="chip ${CONFIG.iaCampos.vegetariano?'ativo':''}" onclick="alternarCampoIA('vegetariano')">Vegetariano</button>
+        <button type="button" class="chip ${CONFIG.iaCampos.alergenos?'ativo':''}" onclick="alternarCampoIA('alergenos')">Alérgenos</button>
+        <button type="button" class="chip ${CONFIG.iaCampos.porcaoSugerida?'ativo':''}" onclick="alternarCampoIA('porcaoSugerida')">Porção sugerida</button>
+      </div>
     ` : ''}
+
+    <div class="linha-config" style="margin-top:10px;">
+      <div class="txt"><b>Foto do funcionário</b><span>Pede uma foto no primeiro acesso, pra você identificar quem retira</span></div>
+      <div class="switch ${CONFIG.fotoFuncionario?'on':''}" onclick="alternarConfig('fotoFuncionario')"><div class="bolinha"></div></div>
+    </div>
 
     <label class="rotulo" style="margin-top:22px;">Senha de acesso do gerente</label>
     <input class="campo" id="cfg-senha" type="text" value="${CONFIG.senhaGerente}" onchange="salvarSenha()">
@@ -1129,6 +1321,31 @@ window.alternarNotificacoes = async () => {
 };
 
 window.setIdentificacao = async (v) => { CONFIG.identificacao = v; await salvarConfig(); renderizarConfig(); };
+async function renderizarEquipe(){
+  const box = document.getElementById('painel-equipe');
+  box.innerHTML = '<p style="color:var(--ink-soft);font-size:13px;">Carregando…</p>';
+  const snap = await getDocs(collection(db, PREFIXO+"funcionarios"));
+  const funcionarios = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+
+  if(funcionarios.length===0){
+    box.innerHTML = `<div class="vazio"><span class="em">🧑‍🏭</span>Nenhum funcionário identificado ainda.</div>`;
+    return;
+  }
+
+  funcionarios.sort((a,b)=> (a.nome||'').localeCompare(b.nome||''));
+
+  box.innerHTML = funcionarios.map(f => `
+    <div class="prato-card" style="align-items:center;">
+      <div class="prato-foto" style="${f.foto ? `background-image:url('${f.foto}')` : ''}">${f.foto ? '' : '🧑‍🏭'}</div>
+      <div class="prato-info">
+        <p class="nome" style="font-size:15px;">${f.nome}</p>
+        <p class="desc">
+          ${f.empresaNome || ''}${f.matricula ? ' · matrícula '+f.matricula : ''}${f.telefone ? ' · '+f.telefone : ''}
+        </p>
+      </div>
+    </div>
+  `).join('');
+}
 window.alternarPagamento = async (v) => {
   const idx = CONFIG.pagamentos.indexOf(v);
   if(idx>-1) CONFIG.pagamentos.splice(idx,1); else CONFIG.pagamentos.push(v);
@@ -1136,6 +1353,11 @@ window.alternarPagamento = async (v) => {
   await salvarConfig(); renderizarConfig();
 };
 window.alternarConfig = async (chave) => { CONFIG[chave] = !CONFIG[chave]; await salvarConfig(); renderizarConfig(); };
+window.alternarCampoIA = async (campo) => {
+  CONFIG.iaCampos[campo] = !CONFIG.iaCampos[campo];
+  await salvarConfig();
+  renderizarConfig();
+};
 window.adicionarEmpresa = async () => {
   const nome = prompt('Nome da empresa:');
   if(!nome) return;
