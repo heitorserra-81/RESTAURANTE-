@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Refeitório">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -275,6 +275,7 @@
     </div>
 
     <div class="conteudo" id="painel-cardapio">
+      <button class="btn btn-fantasma btn-bloco" style="margin-bottom:14px;" onclick="copiarCardapioOntem()">↺ Copiar cardápio de ontem</button>
       <div id="lista-pratos-gerente"></div>
     </div>
 
@@ -305,7 +306,7 @@
    ============================================================ */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc,
+  getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc,
   onSnapshot, query, where, addDoc, serverTimestamp, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -348,7 +349,6 @@ async function uploadFotoSupabase(file, caminho){
 /* ============================================================
    ESTADO GLOBAL
    ============================================================ */
-const SENHA_GERENTE = "refeitorio2026"; // troque depois nas Configurações (Etapa 2)
 let CONFIG = null;               // doc refeitorio_config/geral
 let CARDAPIO_HOJE = [];          // pratos do dia
 let PEDIDOS_HOJE = [];           // pedidos de hoje (tempo real)
@@ -362,6 +362,14 @@ function hojeISO(){
 }
 function dataFormatada(){
   return new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long' });
+}
+function dentroDaJanela(){
+  const agora = new Date();
+  const [hA,mA] = (CONFIG.horaAbertura||'00:00').split(':').map(Number);
+  const [hF,mF] = (CONFIG.horaFechamento||'23:59').split(':').map(Number);
+  const minAgora = agora.getHours()*60 + agora.getMinutes();
+  const minAbre = hA*60+mA, minFecha = hF*60+mF;
+  return minAgora >= minAbre && minAgora <= minFecha;
 }
 function mostrarTela(id){
   document.querySelectorAll('#app > .tela-centro, #app > div[id^="tela-"]').forEach(el=>el.classList.add('hide'));
@@ -384,6 +392,14 @@ const CONFIG_PADRAO = {
   confirmarPresenca: false,
   feedbackPosAlmoco: true,
   campoSugestoes: true,
+  senhaGerente: "refeitorio2026",
+  controlePorcoes: false,
+  janelaPedidos: false,
+  horaAbertura: "07:00",
+  horaFechamento: "10:30",
+  notificacoesPublicacao: false,
+  iaAtivada: false,
+  iaApiKey: "",
   empresas: [
     { codigo: "emp1", nome: "Empresa Exemplo Ltda" }
   ]
@@ -463,7 +479,7 @@ window.abrirLoginGerente = () => mostrarTela('tela-login-gerente');
 
 window.validarSenhaGerente = () => {
   const senha = document.getElementById('input-senha-gerente').value;
-  if(senha === SENHA_GERENTE){
+  if(senha === (CONFIG.senhaGerente || 'refeitorio2026')){
     mostrarTela('tela-gerente');
     renderizarPratosGerente();
   } else {
@@ -551,13 +567,27 @@ function renderizarSaudacao(){
    CARDÁPIO — TEMPO REAL (Firestore)
    Estrutura: refeitorio_cardapio / {AAAA-MM-DD} / pratos: [ {..} ]
    ============================================================ */
+let CARDAPIO_JA_TINHA_PRATOS = null; // null = ainda não sabemos
 function escutarCardapioHoje(){
   const ref = doc(db, PREFIXO+"cardapio", hojeISO());
   onSnapshot(ref, (snap)=>{
     CARDAPIO_HOJE = snap.exists() ? (snap.data().pratos || []) : [];
     renderizarPratosGerente();
     renderizarCardapioFuncionario();
+
+    const temPratosAgora = CARDAPIO_HOJE.length > 0;
+    if(CARDAPIO_JA_TINHA_PRATOS === false && temPratosAgora){
+      notificarCardapioPublicado();
+    }
+    CARDAPIO_JA_TINHA_PRATOS = temPratosAgora;
   });
+}
+function notificarCardapioPublicado(){
+  if(!CONFIG.notificacoesPublicacao) return;
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  try{
+    new Notification('Cardápio do dia liberado! 🍽️', { body: 'Já dá pra escolher o seu almoço de hoje.' });
+  }catch(e){}
 }
 
 async function salvarCardapioHoje(){
@@ -582,9 +612,11 @@ function renderizarPratosGerente(){
         <div class="prato-tags">
           <span class="tagzinha">${p.categoria || 'Prato'}</span>
           ${p.esgotado ? `<span class="tagzinha esgotado">Esgotado</span>` : ''}
+          ${CONFIG.controlePorcoes && p.quantidadeTotal ? `<span class="tagzinha">${contarPedidosDoPrato(p.nome)}/${p.quantidadeTotal} porções</span>` : ''}
         </div>
       </div>
       <div class="prato-acoes">
+        <button class="mini-btn" onclick="abrirModalPrato(${i})">✏️</button>
         <button class="mini-btn" onclick="alternarEsgotado(${i})">${p.esgotado ? '↺' : '⛔'}</button>
         <button class="mini-btn" onclick="excluirPrato(${i})">🗑️</button>
       </div>
@@ -602,27 +634,35 @@ window.excluirPrato = async (i) => {
   await salvarCardapioHoje();
 };
 
-/* ---------- Modal: adicionar prato ---------- */
-window.abrirModalPrato = () => {
+/* ---------- Modal: adicionar / editar prato ---------- */
+window.abrirModalPrato = (indiceEdicao) => {
+  const editando = indiceEdicao !== undefined;
+  const p = editando ? CARDAPIO_HOJE[indiceEdicao] : null;
   const raiz = document.getElementById('raiz-modal');
   raiz.innerHTML = `
     <div class="overlay" onclick="if(event.target===this) fecharModal()">
       <div class="modal">
-        <div class="modal-titulo"><h3>Novo prato</h3><button class="icon-btn" onclick="fecharModal()">✕</button></div>
+        <div class="modal-titulo"><h3>${editando ? 'Editar prato' : 'Novo prato'}</h3><button class="icon-btn" onclick="fecharModal()">✕</button></div>
         <label class="rotulo">Foto do prato</label>
         <input type="file" accept="image/*" capture="environment" class="campo" id="np-foto">
+        ${CONFIG.iaAtivada ? `<button type="button" class="btn btn-fantasma btn-bloco" style="margin-bottom:10px;" onclick="preencherComIA()">🪄 Preencher com IA a partir da foto</button>
+        <p id="ia-status" style="font-size:12px;color:var(--ink-soft);margin:-4px 0 10px;"></p>` : ''}
         <label class="rotulo">Nome do prato</label>
-        <input class="campo" id="np-nome" placeholder="Ex: Feijoada completa">
+        <input class="campo" id="np-nome" placeholder="Ex: Feijoada completa" value="${p?.nome || ''}">
         <label class="rotulo">Descrição / acompanhamentos</label>
-        <textarea class="campo" id="np-desc" rows="3" placeholder="Ex: acompanha arroz, couve, farofa e laranja"></textarea>
+        <textarea class="campo" id="np-desc" rows="3" placeholder="Ex: acompanha arroz, couve, farofa e laranja">${p?.descricao || ''}</textarea>
         <label class="rotulo">Categoria</label>
         <div class="chip-select" id="np-categorias">
           ${['Prato principal','Vegetariano','Acompanhamento','Salada','Sobremesa'].map(c=>
-            `<button type="button" class="chip" data-cat="${c}" onclick="selecionarCategoria(this)">${c}</button>`
+            `<button type="button" class="chip ${p?.categoria===c ? 'ativo':''}" data-cat="${c}" onclick="selecionarCategoria(this)">${c}</button>`
           ).join('')}
         </div>
+        ${CONFIG.controlePorcoes ? `
+          <label class="rotulo">Quantidade de porções disponíveis</label>
+          <input type="number" inputmode="numeric" class="campo" id="np-qtd" placeholder="0 = ilimitado" value="${p?.quantidadeTotal || ''}">
+        ` : ''}
         <div style="margin-top:18px;">
-          <button class="btn btn-primario btn-bloco" onclick="confirmarNovoPrato()">Adicionar ao cardápio de hoje</button>
+          <button class="btn btn-primario btn-bloco" onclick="confirmarPrato(${editando ? indiceEdicao : 'null'})">${editando ? 'Salvar alterações' : 'Adicionar ao cardápio de hoje'}</button>
         </div>
       </div>
     </div>`;
@@ -633,15 +673,19 @@ window.selecionarCategoria = (el) => {
 };
 window.fecharModal = () => { document.getElementById('raiz-modal').innerHTML = ''; };
 
-window.confirmarNovoPrato = async () => {
+window.confirmarPrato = async (indiceEdicao) => {
   const nome = document.getElementById('np-nome').value.trim();
   if(!nome){ toast('Digite o nome do prato'); return; }
   const desc = document.getElementById('np-desc').value.trim();
   const catEl = document.querySelector('#np-categorias .chip.ativo');
   const categoria = catEl ? catEl.dataset.cat : 'Prato principal';
   const fotoInput = document.getElementById('np-foto');
+  const qtdInput = document.getElementById('np-qtd');
+  const quantidadeTotal = qtdInput ? (parseInt(qtdInput.value) || 0) : 0;
 
-  let fotoUrl = "";
+  const editando = indiceEdicao !== null && indiceEdicao !== undefined;
+  let fotoUrl = editando ? (CARDAPIO_HOJE[indiceEdicao].foto || "") : "";
+
   if(fotoInput.files[0]){
     try{
       toast('Enviando foto…');
@@ -652,10 +696,90 @@ window.confirmarNovoPrato = async () => {
     }
   }
 
-  CARDAPIO_HOJE.push({ nome, descricao: desc, categoria, foto: fotoUrl, esgotado: false });
+  const dadosPrato = { nome, descricao: desc, categoria, foto: fotoUrl, quantidadeTotal, esgotado: editando ? CARDAPIO_HOJE[indiceEdicao].esgotado : false };
+
+  if(editando){
+    CARDAPIO_HOJE[indiceEdicao] = dadosPrato;
+  } else {
+    CARDAPIO_HOJE.push(dadosPrato);
+  }
   await salvarCardapioHoje();
   fecharModal();
-  toast('Prato adicionado!');
+  toast(editando ? 'Prato atualizado!' : 'Prato adicionado!');
+};
+
+window.copiarCardapioOntem = async () => {
+  const ontem = new Date();
+  ontem.setDate(ontem.getDate()-1);
+  const dataOntem = ontem.toISOString().slice(0,10);
+  const ref = doc(db, PREFIXO+"cardapio", dataOntem);
+  const snap = await getDoc(ref);
+  if(!snap.exists() || !(snap.data().pratos||[]).length){
+    toast('Não encontrei cardápio de ontem');
+    return;
+  }
+  const pratosOntem = snap.data().pratos.map(p => ({ ...p, esgotado:false }));
+  CARDAPIO_HOJE = [...CARDAPIO_HOJE, ...pratosOntem];
+  await salvarCardapioHoje();
+  toast('Cardápio de ontem copiado!');
+};
+
+function arquivoParaBase64(file){
+  return new Promise((resolve, reject) => {
+    const leitor = new FileReader();
+    leitor.onload = () => resolve(leitor.result.split(',')[1]);
+    leitor.onerror = reject;
+    leitor.readAsDataURL(file);
+  });
+}
+
+window.preencherComIA = async () => {
+  const fotoInput = document.getElementById('np-foto');
+  const statusEl = document.getElementById('ia-status');
+  if(!fotoInput.files[0]){ toast('Escolha uma foto primeiro'); return; }
+  if(!CONFIG.iaApiKey){ toast('Cadastre a chave da IA em Configurações'); return; }
+
+  statusEl.textContent = 'Analisando a foto…';
+  try{
+    const base64 = await arquivoParaBase64(fotoInput.files[0]);
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CONFIG.iaApiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 500,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: fotoInput.files[0].type, data: base64 } },
+            { type: 'text', text: 'Veja esta foto de um prato de restaurante (pode ser o prato pronto ou um papel/quadro com a descrição escrita). Responda SOMENTE com um JSON, sem markdown, sem texto antes ou depois, no formato: {"nome":"...","descricao":"...","categoria":"Prato principal|Vegetariano|Acompanhamento|Salada|Sobremesa"}. A descrição deve listar os acompanhamentos de forma curta.' }
+          ]
+        }]
+      })
+    });
+    const dados = await resp.json();
+    if(!resp.ok) throw new Error(dados.error?.message || 'Erro na API');
+    const textoResposta = dados.content.map(c=>c.text||'').join('').trim();
+    const limpo = textoResposta.replace(/```json|```/g,'').trim();
+    const resultado = JSON.parse(limpo);
+
+    document.getElementById('np-nome').value = resultado.nome || '';
+    document.getElementById('np-desc').value = resultado.descricao || '';
+    if(resultado.categoria){
+      document.querySelectorAll('#np-categorias .chip').forEach(c=>{
+        c.classList.toggle('ativo', c.dataset.cat === resultado.categoria);
+      });
+    }
+    statusEl.textContent = 'Preenchido! Confira antes de salvar.';
+  }catch(e){
+    console.error(e);
+    statusEl.textContent = 'Não consegui analisar a foto: ' + (e.message||e);
+  }
 };
 
 /* ---------- Render: lado Funcionário ---------- */
@@ -676,10 +800,17 @@ function renderizarCardapioFuncionario(){
         <div class="selo">✅</div>
         <h2>Pedido confirmado!</h2>
         <p>Você escolheu: <b>${prato.nome}</b></p>
+        ${PEDIDO_ATUAL.codigoRetirada ? `<p style="margin-top:14px;font-size:12px;opacity:.7;">CÓDIGO DE RETIRADA</p>
+        <p style="font-family:'Fraunces';font-size:34px;font-weight:700;letter-spacing:.05em;margin:2px 0 0;">${PEDIDO_ATUAL.codigoRetirada}</p>` : ''}
       </div>
       <button class="btn btn-fantasma btn-bloco" style="margin-top:14px;" onclick="trocarPedido()">Trocar de prato</button>
       ${CONFIG.campoSugestoes ? renderizarBlocoSugestao() : ''}
     `;
+    return;
+  }
+
+  if(CONFIG.janelaPedidos && !dentroDaJanela()){
+    box.innerHTML = `<div class="vazio"><span class="em">🕐</span>Pedidos abrem das <b>${CONFIG.horaAbertura}</b> às <b>${CONFIG.horaFechamento}</b>.<br>Volte dentro desse horário.</div>`;
     return;
   }
 
@@ -707,6 +838,7 @@ function renderizarBlocoSugestao(){
 
 window.escolherPrato = async (i) => {
   const prato = CARDAPIO_HOJE[i];
+  const codigo = String(Math.floor(1000 + Math.random()*9000));
   const pedido = {
     data: hojeISO(),
     pratoNome: prato.nome,
@@ -714,6 +846,8 @@ window.escolherPrato = async (i) => {
     empresaCodigo: FUNCIONARIO.empresaCodigo || null,
     empresaNome: FUNCIONARIO.empresaNome || null,
     presencaConfirmada: !CONFIG.confirmarPresenca, // se não usa presença, já conta como ok
+    codigoRetirada: codigo,
+    retirado: false,
     criadoEm: serverTimestamp()
   };
   const ref = await addDoc(collection(db, PREFIXO+"pedidos"), pedido);
@@ -757,7 +891,30 @@ function escutarPedidosHoje(){
   onSnapshot(q, (snap)=>{
     PEDIDOS_HOJE = snap.docs.map(d=>({ id:d.id, ...d.data() }));
     if(TAB_GERENTE_ATIVA === 'relatorio') renderizarRelatorio();
+    if(document.getElementById('lista-pratos-gerente')) renderizarPratosGerente();
+    if(CONFIG.controlePorcoes) verificarEsgotamentoAutomatico();
   });
+}
+
+function contarPedidosDoPrato(nomePrato){
+  return PEDIDOS_HOJE.filter(p => p.pratoNome === nomePrato).length;
+}
+
+let JA_ESGOTANDO = false;
+async function verificarEsgotamentoAutomatico(){
+  if(JA_ESGOTANDO) return;
+  let mudou = false;
+  CARDAPIO_HOJE.forEach(p => {
+    if(p.quantidadeTotal > 0 && !p.esgotado){
+      const pedidos = contarPedidosDoPrato(p.nome);
+      if(pedidos >= p.quantidadeTotal){ p.esgotado = true; mudou = true; }
+    }
+  });
+  if(mudou){
+    JA_ESGOTANDO = true;
+    await salvarCardapioHoje();
+    JA_ESGOTANDO = false;
+  }
 }
 
 function renderizarRelatorio(){
@@ -796,8 +953,59 @@ function renderizarRelatorio(){
           <div class="qtd">${qtd}</div>
         </div>`).join('')}
     ` : ''}
+
+    <label class="rotulo" style="margin-top:26px;">Pedidos de hoje (retirada)</label>
+    ${PEDIDOS_HOJE.length ? PEDIDOS_HOJE.map(p=>`
+      <div class="linha-config">
+        <div class="txt"><b>${p.funcionarioNome}</b><span>${p.pratoNome}${p.codigoRetirada ? ' · cód. '+p.codigoRetirada : ''}</span></div>
+        <div class="switch ${p.retirado?'on':''}" onclick="alternarRetirado('${p.id}', ${!p.retirado})"><div class="bolinha"></div></div>
+      </div>`).join('') : '<p style="color:var(--ink-soft);font-size:13px;">Nenhum pedido ainda.</p>'}
+
+    <label class="rotulo" style="margin-top:26px;">Relatório por período</label>
+    <div style="display:flex;gap:8px;">
+      <input type="date" class="campo" id="rp-inicio">
+      <input type="date" class="campo" id="rp-fim">
+    </div>
+    <button class="btn btn-fantasma btn-bloco" onclick="buscarRelatorioPeriodo()">Buscar período</button>
+    <div id="resultado-periodo"></div>
   `;
 }
+
+window.alternarRetirado = async (pedidoId, novoValor) => {
+  await updateDoc(doc(db, PREFIXO+"pedidos", pedidoId), { retirado: novoValor });
+};
+
+window.buscarRelatorioPeriodo = async () => {
+  const inicio = document.getElementById('rp-inicio').value;
+  const fim = document.getElementById('rp-fim').value;
+  const resultBox = document.getElementById('resultado-periodo');
+  if(!inicio || !fim){ toast('Escolha as duas datas'); return; }
+  resultBox.innerHTML = '<p style="color:var(--ink-soft);font-size:13px;">Buscando…</p>';
+
+  const q = query(collection(db, PREFIXO+"pedidos"), where("data",">=",inicio), where("data","<=",fim));
+  const snap = await getDocs(q);
+  const pedidos = snap.docs.map(d=>d.data());
+
+  const porEmpresa = {};
+  pedidos.forEach(p=>{
+    const nome = p.empresaNome || 'Não informado';
+    porEmpresa[nome] = (porEmpresa[nome]||0)+1;
+  });
+  const totalPeriodo = pedidos.length;
+
+  resultBox.innerHTML = `
+    <div class="stat-grid" style="margin-top:10px;">
+      <div class="stat-box"><div class="num">${totalPeriodo}</div><div class="lbl">Total no período</div></div>
+      <div class="stat-box"><div class="num">${Object.keys(porEmpresa).length}</div><div class="lbl">Empresas</div></div>
+    </div>
+    ${Object.entries(porEmpresa).map(([nome,qtd])=>`
+      <div class="barra-item">
+        <div class="nome">${nome}</div>
+        <div class="barra-fundo"><div class="barra-preenchida" style="width:${(qtd/Math.max(1,totalPeriodo))*100}%"></div></div>
+        <div class="qtd">${qtd}</div>
+      </div>`).join('') || '<p style="color:var(--ink-soft);font-size:13px;">Nenhum pedido no período.</p>'}
+  `;
+};
 
 /* ============================================================
    TABS DO GERENTE
@@ -849,6 +1057,36 @@ function renderizarConfig(){
       <div class="txt"><b>Campo de sugestões</b><span>Funcionário pode sugerir melhorias a qualquer momento</span></div>
       <div class="switch ${CONFIG.campoSugestoes?'on':''}" onclick="alternarConfig('campoSugestoes')"><div class="bolinha"></div></div>
     </div>
+    <div class="linha-config">
+      <div class="txt"><b>Controle de porções</b><span>Prato esgota sozinho ao atingir a quantidade cadastrada</span></div>
+      <div class="switch ${CONFIG.controlePorcoes?'on':''}" onclick="alternarConfig('controlePorcoes')"><div class="bolinha"></div></div>
+    </div>
+    <div class="linha-config">
+      <div class="txt"><b>Restringir horário de pedidos</b><span>Funcionário só escolhe o prato dentro da janela abaixo</span></div>
+      <div class="switch ${CONFIG.janelaPedidos?'on':''}" onclick="alternarConfig('janelaPedidos')"><div class="bolinha"></div></div>
+    </div>
+    ${CONFIG.janelaPedidos ? `
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <div style="flex:1;"><label class="rotulo">Abre às</label><input type="time" class="campo" id="cfg-hora-abertura" value="${CONFIG.horaAbertura}" onchange="salvarHorarios()"></div>
+        <div style="flex:1;"><label class="rotulo">Fecha às</label><input type="time" class="campo" id="cfg-hora-fechamento" value="${CONFIG.horaFechamento}" onchange="salvarHorarios()"></div>
+      </div>
+    ` : ''}
+    <div class="linha-config">
+      <div class="txt"><b>Notificar cardápio publicado</b><span>Avisa o funcionário quando o cardápio do dia sair (app precisa estar aberto)</span></div>
+      <div class="switch ${CONFIG.notificacoesPublicacao?'on':''}" onclick="alternarNotificacoes()"><div class="bolinha"></div></div>
+    </div>
+    <div class="linha-config">
+      <div class="txt"><b>Cadastro de prato por foto (IA)</b><span>Botão pra IA preencher nome/descrição a partir da foto</span></div>
+      <div class="switch ${CONFIG.iaAtivada?'on':''}" onclick="alternarConfig('iaAtivada')"><div class="bolinha"></div></div>
+    </div>
+    ${CONFIG.iaAtivada ? `
+      <label class="rotulo">Chave da API (Anthropic)</label>
+      <input class="campo" id="cfg-ia-key" placeholder="sk-ant-..." value="${CONFIG.iaApiKey||''}" onchange="salvarChaveIA()">
+      <p style="font-size:11.5px;color:var(--ink-soft);margin:-6px 0 10px;">Gerada em console.anthropic.com — fica salva só no seu Firestore.</p>
+    ` : ''}
+
+    <label class="rotulo" style="margin-top:22px;">Senha de acesso do gerente</label>
+    <input class="campo" id="cfg-senha" type="text" value="${CONFIG.senhaGerente}" onchange="salvarSenha()">
 
     <label class="rotulo" style="margin-top:22px;">Empresas atendidas</label>
     <div id="lista-empresas">
@@ -861,6 +1099,34 @@ function renderizarConfig(){
     <button class="btn btn-fantasma btn-bloco" onclick="adicionarEmpresa()">+ Adicionar empresa</button>
   `;
 }
+
+window.salvarSenha = async () => {
+  const v = document.getElementById('cfg-senha').value.trim();
+  if(!v){ toast('Digite uma senha'); return; }
+  CONFIG.senhaGerente = v;
+  await salvarConfig();
+  toast('Senha atualizada!');
+};
+window.salvarHorarios = async () => {
+  CONFIG.horaAbertura = document.getElementById('cfg-hora-abertura').value;
+  CONFIG.horaFechamento = document.getElementById('cfg-hora-fechamento').value;
+  await salvarConfig();
+  toast('Horário salvo!');
+};
+window.salvarChaveIA = async () => {
+  CONFIG.iaApiKey = document.getElementById('cfg-ia-key').value.trim();
+  await salvarConfig();
+  toast('Chave salva!');
+};
+window.alternarNotificacoes = async () => {
+  if(!CONFIG.notificacoesPublicacao && 'Notification' in window){
+    const permissao = await Notification.requestPermission();
+    if(permissao !== 'granted'){ toast('Permissão de notificação negada'); return; }
+  }
+  CONFIG.notificacoesPublicacao = !CONFIG.notificacoesPublicacao;
+  await salvarConfig();
+  renderizarConfig();
+};
 
 window.setIdentificacao = async (v) => { CONFIG.identificacao = v; await salvarConfig(); renderizarConfig(); };
 window.alternarPagamento = async (v) => {
