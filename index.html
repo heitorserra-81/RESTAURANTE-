@@ -25,6 +25,7 @@
     --tomato:#CE2B37;
     --line:rgba(201,168,76,.22);
     --radius:18px;
+    --radius-card:10px;
     --shadow:0 8px 24px rgba(0,0,0,.4);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -39,7 +40,6 @@
   .app{max-width:520px;margin:0 auto;min-height:100vh;position:relative;padding-bottom:90px;}
   .hide{display:none !important;}
 
-  /* ---------- Splash ---------- */
   #tela-splash{position:fixed;inset:0;background:var(--pine);display:flex;flex-direction:column;
     align-items:center;justify-content:center;color:#fff;z-index:999;transition:opacity .4s;padding:24px;text-align:center;}
   #tela-splash h1{font-size:28px;font-weight:700;margin:16px 0 4px;}
@@ -51,7 +51,6 @@
   .logo-topbar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--amber);flex-shrink:0;}
   .foto-topbar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--amber);flex-shrink:0;}
 
-  /* ---------- Topbar ---------- */
   .topbar{position:sticky;top:0;z-index:20;background:var(--bg);padding:16px 20px 12px;
     display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);gap:10px;}
   .topbar .esquerda{display:flex;align-items:center;gap:10px;min-width:0;}
@@ -60,7 +59,6 @@
   .icon-btn{width:38px;height:38px;border-radius:50%;background:var(--paper);border:1px solid var(--line);
     display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;color:var(--ink);}
 
-  /* ---------- Seleção de perfil ---------- */
   .tela-centro{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:28px;gap:14px;}
   .marca{text-align:center;margin-bottom:24px;}
   .marca h1{font-size:26px;margin:0 0 6px;color:var(--amber);}
@@ -74,7 +72,6 @@
   .cartao-opcao .txt span{font-size:12.5px;color:var(--ink-soft);}
   .cartao-opcao .seta{color:var(--ink-soft);font-size:18px;}
 
-  /* ---------- Botões padrão ---------- */
   .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:15px 20px;
     border-radius:14px;font-weight:700;font-size:15px;transition:transform .1s;}
   .btn:active{transform:scale(.97);}
@@ -90,50 +87,58 @@
   label.rotulo{font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;
     letter-spacing:.04em;margin:14px 0 6px;display:block;}
 
-  /* ---------- Conteúdo ---------- */
   .conteudo{padding:16px 20px 20px;}
 
-  /* ---------- Tabs Gerente ---------- */
   .tabs{display:flex;gap:6px;padding:0 20px 14px;overflow-x:auto;}
   .tab{padding:9px 16px;border-radius:100px;font-size:13px;font-weight:700;color:var(--ink-soft);
     background:var(--paper);border:1px solid var(--line);white-space:nowrap;}
   .tab.ativa{background:var(--pine);color:#fff;border-color:var(--pine);}
 
-  /* ---------- Seção de categoria ---------- */
-  .secao-categoria{margin-bottom:24px;}
-  .secao-titulo{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-  .secao-titulo h3{font-size:16px;margin:0;color:var(--amber);}
-  .secao-titulo .obrig{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;}
+  .secao-categoria{margin-bottom:28px;}
+  .secao-titulo{margin-bottom:12px;}
+  .secao-titulo .rotulo-cat{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;font-weight:700;}
+  .secao-titulo h3{font-size:18px;margin:2px 0 3px;color:var(--amber);}
+  .secao-titulo .obrig{font-size:11.5px;color:var(--ink-soft);}
 
-  /* ---------- Card de opção (gerente) ---------- */
+  /* ---------- Card do gerente (lista compacta com alça de arrastar) ---------- */
   .prato-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
-    padding:14px;display:flex;gap:12px;margin-bottom:10px;box-shadow:var(--shadow);position:relative;}
-  .prato-foto{width:60px;height:60px;border-radius:12px;background:var(--bg);flex-shrink:0;
+    padding:14px;display:flex;gap:10px;margin-bottom:10px;box-shadow:var(--shadow);position:relative;
+    align-items:center;touch-action:pan-y;}
+  .prato-card.arrastando{box-shadow:0 16px 34px rgba(0,0,0,.55);opacity:.95;z-index:30;background:var(--pine-dark);}
+  .handle-arrastar{font-size:20px;color:var(--ink-soft);padding:4px 2px;touch-action:none;cursor:grab;flex-shrink:0;}
+  .prato-foto{width:56px;height:56px;border-radius:12px;background:var(--bg);flex-shrink:0;
     background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;
     font-size:22px;color:var(--ink-soft);overflow:hidden;}
   .prato-info{flex:1;min-width:0;}
-  .prato-info .nome{font-family:'Playfair Display';font-weight:700;font-size:15.5px;margin:0 0 2px;color:var(--ink);}
-  .prato-info .desc{font-size:12.5px;color:var(--ink-soft);margin:0 0 6px;line-height:1.4;}
+  .prato-info .nome{font-family:'Playfair Display';font-weight:700;font-size:15px;margin:0 0 2px;color:var(--ink);}
+  .prato-info .desc{font-size:12px;color:var(--ink-soft);margin:0 0 6px;line-height:1.4;}
   .prato-tags{display:flex;gap:6px;flex-wrap:wrap;}
-  .tagzinha{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:100px;background:var(--bg);
+  .tagzinha{font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:var(--bg);
     color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;}
   .tagzinha.esgotado{background:rgba(206,43,55,.22);color:#FF8A8A;}
   .tagzinha.coringa{background:rgba(201,168,76,.18);color:var(--amber);}
   .prato-acoes{display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
-  .mini-btn{width:32px;height:32px;border-radius:9px;background:var(--bg);display:flex;
-    align-items:center;justify-content:center;font-size:14px;color:var(--ink);}
+  .mini-btn{width:30px;height:30px;border-radius:9px;background:var(--bg);display:flex;
+    align-items:center;justify-content:center;font-size:13px;color:var(--ink);}
 
-  /* ---------- Linha de opção selecionável (funcionário) ---------- */
-  .opcao-linha{background:var(--paper);border:2px solid var(--line);border-radius:14px;
-    padding:12px;display:flex;gap:12px;align-items:center;margin-bottom:8px;}
-  .opcao-linha.selecionada{border-color:var(--amber);background:rgba(201,168,76,.1);}
-  .opcao-linha.esgotada{opacity:.4;pointer-events:none;}
-  .opcao-linha .prato-foto{width:52px;height:52px;}
-  .opcao-linha .radio-fake{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;font-size:12px;}
-  .opcao-linha.selecionada .radio-fake{border-color:var(--amber);background:var(--amber);color:#1A0A0A;}
+  /* ---------- Card grande de opção (funcionário) — foto em cima, brilho ---------- */
+  .opcao-card{background:var(--paper);border-radius:var(--radius-card);margin-bottom:14px;overflow:hidden;
+    box-shadow:0 0 0 1px rgba(201,168,76,.3), 0 6px 20px rgba(201,168,76,.12);
+    transition:box-shadow .15s, transform .1s; position:relative;}
+  .opcao-card:active{transform:scale(.985);}
+  .opcao-card.selecionada{box-shadow:0 0 0 2px var(--amber), 0 0 28px rgba(201,168,76,.6);}
+  .opcao-card.esgotada{opacity:.4;pointer-events:none;}
+  .opcao-card .foto-grande{width:100%;height:140px;background:var(--bg);background-size:cover;background-position:center;
+    display:flex;align-items:center;justify-content:center;font-size:38px;color:var(--ink-soft);position:relative;}
+  .opcao-card .check-selo{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;
+    background:var(--amber);color:#1A0A0A;display:none;align-items:center;justify-content:center;font-size:16px;font-weight:900;
+    box-shadow:0 2px 8px rgba(0,0,0,.4);}
+  .opcao-card.selecionada .check-selo{display:flex;}
+  .opcao-card .texto{padding:12px 14px 14px;}
+  .opcao-card .texto .nome{font-size:16px;margin:0 0 4px;}
+  .opcao-card .texto .desc{font-size:13px;color:var(--ink-soft);line-height:1.5;margin:0;}
+  .opcao-card .texto .coringa-nota{font-size:11px;color:var(--amber);margin-top:6px;}
 
-  /* ---------- Confirmação ---------- */
   .confirmacao-box{background:var(--pine);color:#fff;border-radius:var(--radius);padding:24px;text-align:center;}
   .confirmacao-box .selo{font-size:44px;margin-bottom:8px;}
   .confirmacao-box h2{margin:0 0 6px;font-size:20px;}
@@ -141,7 +146,6 @@
   .resumo-prato{background:rgba(255,255,255,.08);border-radius:12px;padding:12px 14px;margin-top:14px;text-align:left;}
   .resumo-prato div{font-size:13px;padding:3px 0;opacity:.9;}
 
-  /* ---------- Toggle / switch ---------- */
   .linha-config{display:flex;align-items:center;justify-content:space-between;padding:14px 0;
     border-bottom:1px solid var(--line);gap:12px;}
   .linha-config .txt b{display:block;font-size:14.5px;color:var(--ink);}
@@ -157,20 +161,20 @@
     font-size:13px;font-weight:700;color:var(--ink-soft);}
   .chip.ativo{background:var(--amber);color:#1A0A0A;border-color:var(--amber);}
 
-  /* ---------- Categoria (config) ---------- */
   .categoria-config-item{background:var(--paper);border:1px solid var(--line);border-radius:14px;
     padding:12px 14px;margin-bottom:8px;}
   .categoria-config-item .linha1{display:flex;align-items:center;justify-content:space-between;gap:8px;}
   .categoria-config-item input.nome-cat{background:none;border:none;color:var(--ink);font-weight:700;
     font-size:14.5px;flex:1;padding:4px 0;}
-  .categoria-config-item .linha2{display:flex;gap:16px;margin-top:8px;font-size:11.5px;color:var(--ink-soft);}
+  .categoria-config-item .linha2{display:flex;gap:14px;margin-top:8px;font-size:11.5px;color:var(--ink-soft);flex-wrap:wrap;}
   .categoria-config-item label{display:flex;align-items:center;gap:5px;}
+  .categoria-config-item .campo-instrucao{margin-top:8px;font-size:13px;padding:10px 12px;}
+  .categoria-config-item .qtd-escolhas{display:flex;align-items:center;gap:8px;margin-top:8px;}
+  .categoria-config-item .qtd-escolhas input{width:56px;padding:6px 8px;text-align:center;margin:0;}
 
-  /* ---------- Barra inferior fixa ---------- */
   .barra-fixa{position:fixed;bottom:0;left:0;right:0;background:var(--paper);border-top:1px solid var(--line);
     padding:12px 20px calc(12px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;z-index:15;}
 
-  /* ---------- Modal ---------- */
   .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;
     align-items:flex-end;justify-content:center;}
   .modal{background:var(--bg);width:100%;max-width:520px;border-radius:22px 22px 0 0;
@@ -179,7 +183,6 @@
   .modal-titulo{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
   .modal-titulo h3{margin:0;font-size:18px;color:var(--amber);}
 
-  /* ---------- Relatório ---------- */
   .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
   .stat-box{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px;}
   .stat-box .num{font-family:'Playfair Display';font-size:26px;font-weight:700;color:var(--amber);}
@@ -190,13 +193,6 @@
   .barra-preenchida{height:100%;background:var(--amber);border-radius:100px;}
   .barra-item .qtd{font-size:12.5px;font-weight:700;width:22px;text-align:right;}
 
-  /* ---------- Feedback ---------- */
-  .carinhas{display:flex;gap:12px;justify-content:center;margin:18px 0;}
-  .carinha{width:64px;height:64px;border-radius:50%;background:var(--paper);border:2px solid var(--line);
-    font-size:28px;display:flex;align-items:center;justify-content:center;}
-  .carinha.marcada{border-color:var(--amber);background:rgba(201,168,76,.18);transform:scale(1.08);}
-
-  /* ---------- Instalar banner ---------- */
   #banner-instalar{position:fixed;left:16px;right:16px;bottom:16px;max-width:488px;margin:0 auto;
     background:var(--paper);border:1px solid var(--line);color:#fff;border-radius:16px;padding:14px 16px;display:flex;
     align-items:center;gap:12px;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:40;}
@@ -224,7 +220,6 @@
 
 <div class="app hide" id="app">
 
-  <!-- ===================== SELEÇÃO DE PERFIL ===================== -->
   <div id="tela-perfil" class="tela-centro hide">
     <div class="marca">
       <img src="IMG_1616.png" alt="Marchesini di Roverbella" class="logo-marca" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27200%27 height=%27200%27%3E%3Ccircle cx=%27100%27 cy=%27100%27 r=%2795%27 fill=%27%236B1A1A%27 stroke=%27%23C9A84C%27 stroke-width=%276%27/%3E%3Ctext x=%2750%25%27 y=%2762%25%27 font-size=%2790%27 text-anchor=%27middle%27%3E%F0%9F%8D%BD%3C/text%3E%3C/svg%3E'">
@@ -243,7 +238,6 @@
     </button>
   </div>
 
-  <!-- ===================== LOGIN GERENTE ===================== -->
   <div id="tela-login-gerente" class="tela-centro hide">
     <div class="marca">
       <div style="font-size:44px;margin-bottom:10px;">🔒</div>
@@ -255,7 +249,6 @@
     <button class="btn btn-fantasma btn-bloco" onclick="mostrarTela('tela-perfil')">Voltar</button>
   </div>
 
-  <!-- ===================== IDENTIFICAÇÃO FUNCIONÁRIO ===================== -->
   <div id="tela-identificacao" class="tela-centro hide">
     <div class="marca">
       <div style="font-size:44px;margin-bottom:10px;">👋</div>
@@ -266,7 +259,6 @@
     <button class="btn btn-primario btn-bloco" onclick="salvarIdentificacao()">Continuar</button>
   </div>
 
-  <!-- ===================== FUNCIONÁRIO: CARDÁPIO ===================== -->
   <div id="tela-funcionario" class="hide">
     <div class="topbar">
       <div class="esquerda">
@@ -287,7 +279,6 @@
     </div>
   </div>
 
-  <!-- ===================== GERENTE: PAINEL ===================== -->
   <div id="tela-gerente" class="hide">
     <div class="topbar">
       <div class="esquerda">
@@ -309,6 +300,7 @@
     <div class="conteudo" id="painel-cardapio">
       <button class="btn btn-fantasma btn-bloco" style="margin-bottom:10px;" onclick="copiarCardapioOntem()">↺ Copiar cardápio de ontem</button>
       <button class="btn btn-amber btn-bloco" style="margin-bottom:14px;" onclick="abrirModalCardapioIA()">🪄 Cardápio completo por IA</button>
+      <p style="font-size:11.5px;color:var(--ink-soft);margin:-6px 0 14px;">Segure o ⠿ pra reordenar os itens dentro de cada categoria.</p>
       <div id="secoes-cardapio-gerente"></div>
     </div>
 
@@ -331,8 +323,7 @@
 <script type="module">
 /* ============================================================
    FIREBASE — mesmo projeto staffcheck-d6f20, prefixo refeitorio_
-   ⚠️ IMPORTANTE: cole aqui o MESMO firebaseConfig que você já
-   colou na versão anterior do app (não foi salvo automaticamente).
+   ⚠️ Cole aqui o firebaseConfig
    ============================================================ */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -364,12 +355,7 @@ async function uploadFotoSupabase(file, caminho){
   const url = `${SUPABASE_URL}/storage/v1/object/${SUPABASE_BUCKET}/${caminho}`;
   const resp = await fetch(url, {
     method: "POST",
-    headers: {
-      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-      "apikey": SUPABASE_ANON_KEY,
-      "Content-Type": file.type,
-      "x-upsert": "true"
-    },
+    headers: { "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "apikey": SUPABASE_ANON_KEY, "Content-Type": file.type, "x-upsert": "true" },
     body: file
   });
   if(!resp.ok) throw new Error("Falha no upload da foto");
@@ -388,8 +374,8 @@ function arquivoParaBase64(file){
    ESTADO GLOBAL
    ============================================================ */
 const CONFIG_PADRAO = {
-  identificacao: "nome_empresa",     // nome_empresa | matricula | telefone
-  pagamentos: ["fatura_empresa"],    // fatura_empresa | pix_dinheiro | vr_va
+  identificacao: "nome_empresa",
+  pagamentos: ["fatura_empresa"],
   confirmarPresenca: false,
   feedbackPosAlmoco: true,
   campoSugestoes: true,
@@ -404,33 +390,30 @@ const CONFIG_PADRAO = {
   fotoFuncionario: false,
   iaCampos: { vegetariano:false, alergenos:false, porcaoSugerida:false },
   categorias: [
-    { id:'proteina',   nome:'Proteína',     ativo:true,  obrigatorio:true  },
-    { id:'guarnicao1', nome:'Guarnição 1',  ativo:true,  obrigatorio:true  },
-    { id:'guarnicao2', nome:'Guarnição 2',  ativo:true,  obrigatorio:false },
-    { id:'guarnicao3', nome:'Guarnição 3',  ativo:false, obrigatorio:false },
-    { id:'guarnicao4', nome:'Guarnição 4',  ativo:false, obrigatorio:false },
-    { id:'salada',     nome:'Salada',       ativo:true,  obrigatorio:false },
-    { id:'sobremesa',  nome:'Sobremesa',    ativo:false, obrigatorio:false }
+    { id:'proteina',   nome:'Proteína',     ativo:true,  obrigatorio:true,  maxEscolhas:1, instrucao:'' },
+    { id:'guarnicao1', nome:'Guarnição 1',  ativo:true,  obrigatorio:true,  maxEscolhas:1, instrucao:'' },
+    { id:'guarnicao2', nome:'Guarnição 2',  ativo:true,  obrigatorio:false, maxEscolhas:1, instrucao:'' },
+    { id:'guarnicao3', nome:'Guarnição 3',  ativo:false, obrigatorio:false, maxEscolhas:1, instrucao:'' },
+    { id:'guarnicao4', nome:'Guarnição 4',  ativo:false, obrigatorio:false, maxEscolhas:1, instrucao:'' },
+    { id:'salada',     nome:'Salada',       ativo:true,  obrigatorio:false, maxEscolhas:1, instrucao:'' },
+    { id:'sobremesa',  nome:'Sobremesa',    ativo:false, obrigatorio:false, maxEscolhas:1, instrucao:'' }
   ],
-  coringas: {}, // ex: { proteina: [{nome:'Omelete', descricao:'...'}] }
-  empresas: [
-    { codigo: "emp1", nome: "Empresa Exemplo Ltda" }
-  ]
+  coringas: {},
+  empresas: [ { codigo: "emp1", nome: "Empresa Exemplo Ltda" } ]
 };
 
 let CONFIG = null;
-let CARDAPIO_CATEGORIAS = {};    // { catId: [opcoes do dia] }
+let CARDAPIO_CATEGORIAS = {};
 let PEDIDOS_HOJE = [];
 let FUNCIONARIO = null;
 let PEDIDO_ATUAL = null;
-let SELECOES = {};               // { catId: nomeDaOpcaoEscolhida }  (tela do funcionário, antes de confirmar)
+let SELECOES = {};               // { catId: [nomesEscolhidos] }
 let TAB_GERENTE_ATIVA = "cardapio";
 let CATEGORIA_MODAL_ATUAL = null;
+let SUGESTOES_MAX_PENDENTES = null; // usado no fluxo de revisão da IA
 
 function hojeISO(){ return new Date().toISOString().slice(0,10); }
-function dataFormatada(){
-  return new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long' });
-}
+function dataFormatada(){ return new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long' }); }
 function dentroDaJanela(){
   const agora = new Date();
   const [hA,mA] = (CONFIG.horaAbertura||'00:00').split(':').map(Number);
@@ -443,15 +426,10 @@ function mostrarTela(id){
   document.getElementById(id).classList.remove('hide');
 }
 function toast(msg){
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(()=>t.remove(), 2800);
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(), 2800);
 }
-function categoriasAtivas(){
-  return CONFIG.categorias.filter(c=>c.ativo);
-}
+function categoriasAtivas(){ return CONFIG.categorias.filter(c=>c.ativo); }
 function itensDaCategoria(catId){
   const doDia = CARDAPIO_CATEGORIAS[catId] || [];
   const coringas = (CONFIG.coringas[catId] || []).map(c => ({ ...c, coringa:true, esgotado:false }));
@@ -466,7 +444,7 @@ async function carregarConfig(){
     CONFIG = {
       ...CONFIG_PADRAO, ...salvo,
       iaCampos: { ...CONFIG_PADRAO.iaCampos, ...(salvo.iaCampos||{}) },
-      categorias: salvo.categorias && salvo.categorias.length ? salvo.categorias : CONFIG_PADRAO.categorias,
+      categorias: salvo.categorias && salvo.categorias.length ? salvo.categorias.map(c=>({ maxEscolhas:1, instrucao:'', ...c })) : CONFIG_PADRAO.categorias,
       coringas: salvo.coringas || {}
     };
   } else {
@@ -474,9 +452,7 @@ async function carregarConfig(){
     await setDoc(ref, CONFIG);
   }
 }
-async function salvarConfig(){
-  await setDoc(doc(db, PREFIXO+"config", "geral"), CONFIG, { merge:true });
-}
+async function salvarConfig(){ await setDoc(doc(db, PREFIXO+"config", "geral"), CONFIG, { merge:true }); }
 
 /* ============================================================
    INICIALIZAÇÃO
@@ -486,32 +462,24 @@ async function iniciar(){
   const alarmeTravado = setTimeout(()=>{
     txtSplash.innerHTML = 'Demorando mais que o normal…<br>Verifique sua internet ou se o firebaseConfig foi preenchido.';
   }, 8000);
-
   try{
     await carregarConfig();
     escutarCardapioHoje();
     escutarPedidosHoje();
-
     document.getElementById('data-hoje-func').textContent = dataFormatada();
     document.getElementById('data-hoje-gerente').textContent = dataFormatada();
-
     clearTimeout(alarmeTravado);
     document.getElementById('tela-splash').style.opacity = '0';
     setTimeout(()=>{
       document.getElementById('tela-splash').classList.add('hide');
       document.getElementById('app').classList.remove('hide');
       const salvo = localStorage.getItem('refeitorio_funcionario');
-      if(salvo){
-        FUNCIONARIO = JSON.parse(salvo);
-        mostrarTela('tela-funcionario');
-        renderizarSaudacao();
-      } else {
-        mostrarTela('tela-perfil');
-      }
+      if(salvo){ FUNCIONARIO = JSON.parse(salvo); mostrarTela('tela-funcionario'); renderizarSaudacao(); }
+      else mostrarTela('tela-perfil');
     }, 400);
-
     configurarInstalacaoPWA();
     registrarServiceWorker();
+    ativarArrastoGerente();
   }catch(erro){
     clearTimeout(alarmeTravado);
     console.error('Erro ao iniciar o app:', erro);
@@ -528,29 +496,19 @@ window.addEventListener('unhandledrejection', (e)=>{
 iniciar();
 
 /* ============================================================
-   NAVEGAÇÃO ENTRE PERFIS
+   NAVEGAÇÃO
    ============================================================ */
 window.abrirLoginGerente = () => mostrarTela('tela-login-gerente');
 window.validarSenhaGerente = () => {
   const senha = document.getElementById('input-senha-gerente').value;
-  if(senha === (CONFIG.senhaGerente || 'refeitorio2026')){
-    mostrarTela('tela-gerente');
-    renderizarCategoriasGerente();
-  } else {
-    toast('Código incorreto');
-  }
+  if(senha === (CONFIG.senhaGerente || 'refeitorio2026')){ mostrarTela('tela-gerente'); renderizarCategoriasGerente(); }
+  else toast('Código incorreto');
 };
 window.sairGerente = () => mostrarTela('tela-perfil');
 window.irParaFuncionario = () => {
   const salvo = localStorage.getItem('refeitorio_funcionario');
-  if(salvo){
-    FUNCIONARIO = JSON.parse(salvo);
-    mostrarTela('tela-funcionario');
-    renderizarSaudacao();
-  } else {
-    montarCamposIdentificacao();
-    mostrarTela('tela-identificacao');
-  }
+  if(salvo){ FUNCIONARIO = JSON.parse(salvo); mostrarTela('tela-funcionario'); renderizarSaudacao(); }
+  else { montarCamposIdentificacao(); mostrarTela('tela-identificacao'); }
 };
 
 /* ============================================================
@@ -558,66 +516,41 @@ window.irParaFuncionario = () => {
    ============================================================ */
 function montarCamposIdentificacao(){
   const box = document.getElementById('campos-identificacao');
-  let html = `<label class="rotulo">Seu nome</label>
-    <input class="campo" id="id-nome" placeholder="Nome completo">`;
-
+  let html = `<label class="rotulo">Seu nome</label><input class="campo" id="id-nome" placeholder="Nome completo">`;
   if(CONFIG.identificacao === "nome_empresa"){
-    html += `<label class="rotulo">Sua empresa</label>
-      <select class="campo" id="id-empresa">
-        ${CONFIG.empresas.map(e=>`<option value="${e.codigo}">${e.nome}</option>`).join('')}
-      </select>`;
+    html += `<label class="rotulo">Sua empresa</label><select class="campo" id="id-empresa">${CONFIG.empresas.map(e=>`<option value="${e.codigo}">${e.nome}</option>`).join('')}</select>`;
   } else if(CONFIG.identificacao === "matricula"){
-    html += `<label class="rotulo">Sua empresa</label>
-      <select class="campo" id="id-empresa">
-        ${CONFIG.empresas.map(e=>`<option value="${e.codigo}">${e.nome}</option>`).join('')}
-      </select>
-      <label class="rotulo">Matrícula / crachá</label>
-      <input class="campo" id="id-matricula" placeholder="Número da matrícula">`;
+    html += `<label class="rotulo">Sua empresa</label><select class="campo" id="id-empresa">${CONFIG.empresas.map(e=>`<option value="${e.codigo}">${e.nome}</option>`).join('')}</select>
+      <label class="rotulo">Matrícula / crachá</label><input class="campo" id="id-matricula" placeholder="Número da matrícula">`;
   } else if(CONFIG.identificacao === "telefone"){
-    html += `<label class="rotulo">WhatsApp</label>
-      <input class="campo" id="id-telefone" inputmode="numeric" placeholder="(19) 90000-0000">`;
+    html += `<label class="rotulo">WhatsApp</label><input class="campo" id="id-telefone" inputmode="numeric" placeholder="(19) 90000-0000">`;
   }
-  if(CONFIG.fotoFuncionario){
-    html += `<label class="rotulo">Sua foto</label>
-      <input type="file" accept="image/*" class="campo" id="id-foto">`;
-  }
+  if(CONFIG.fotoFuncionario){ html += `<label class="rotulo">Sua foto</label><input type="file" accept="image/*" class="campo" id="id-foto">`; }
   box.innerHTML = html;
 }
-
 window.salvarIdentificacao = async () => {
   const nome = document.getElementById('id-nome').value.trim();
   if(!nome){ toast('Digite seu nome'); return; }
-
   const dados = { nome };
   if(CONFIG.identificacao === "nome_empresa" || CONFIG.identificacao === "matricula"){
     const sel = document.getElementById('id-empresa');
-    dados.empresaCodigo = sel.value;
-    dados.empresaNome = sel.options[sel.selectedIndex].textContent;
+    dados.empresaCodigo = sel.value; dados.empresaNome = sel.options[sel.selectedIndex].textContent;
   }
-  if(CONFIG.identificacao === "matricula"){
-    dados.matricula = document.getElementById('id-matricula').value.trim();
-  }
-  if(CONFIG.identificacao === "telefone"){
-    dados.telefone = document.getElementById('id-telefone').value.trim();
-  }
+  if(CONFIG.identificacao === "matricula") dados.matricula = document.getElementById('id-matricula').value.trim();
+  if(CONFIG.identificacao === "telefone") dados.telefone = document.getElementById('id-telefone').value.trim();
   if(CONFIG.fotoFuncionario){
     const fotoInput = document.getElementById('id-foto');
     if(fotoInput?.files[0]){
-      try{
-        toast('Enviando foto…');
-        const caminho = `funcionarios/${Date.now()}_${fotoInput.files[0].name}`;
-        dados.foto = await uploadFotoSupabase(fotoInput.files[0], caminho);
-      }catch(e){ toast('Erro ao enviar a foto — continuando sem foto'); }
+      try{ toast('Enviando foto…'); const caminho = `funcionarios/${Date.now()}_${fotoInput.files[0].name}`; dados.foto = await uploadFotoSupabase(fotoInput.files[0], caminho); }
+      catch(e){ toast('Erro ao enviar a foto — continuando sem foto'); }
     }
   }
-
   FUNCIONARIO = dados;
   localStorage.setItem('refeitorio_funcionario', JSON.stringify(dados));
   await salvarFuncionarioNaEquipe(dados);
   mostrarTela('tela-funcionario');
   renderizarSaudacao();
 };
-
 function idDispositivoFuncionario(){
   let id = localStorage.getItem('refeitorio_funcionario_id');
   if(!id){ id = 'f'+Date.now()+Math.floor(Math.random()*10000); localStorage.setItem('refeitorio_funcionario_id', id); }
@@ -626,30 +559,21 @@ function idDispositivoFuncionario(){
 async function salvarFuncionarioNaEquipe(dados){
   await setDoc(doc(db, PREFIXO+"funcionarios", idDispositivoFuncionario()), { ...dados, atualizadoEm: serverTimestamp() }, { merge:true });
 }
-
 window.abrirMenuFuncionario = () => {
   if(confirm('Trocar de funcionário / sair deste perfil?')){
-    localStorage.removeItem('refeitorio_funcionario');
-    FUNCIONARIO = null;
-    mostrarTela('tela-perfil');
+    localStorage.removeItem('refeitorio_funcionario'); FUNCIONARIO = null; mostrarTela('tela-perfil');
   }
 };
-
 function renderizarSaudacao(){
   const primeiroNome = (FUNCIONARIO?.nome || '').split(' ')[0];
   document.getElementById('saudacao-funcionario').textContent = `Olá, ${primeiroNome || 'tudo bem'}!`;
   const fotoEl = document.getElementById('foto-funcionario-topbar');
-  if(FUNCIONARIO?.foto){
-    fotoEl.src = FUNCIONARIO.foto;
-    fotoEl.classList.remove('hide');
-  } else {
-    fotoEl.classList.add('hide');
-  }
+  if(FUNCIONARIO?.foto){ fotoEl.src = FUNCIONARIO.foto; fotoEl.classList.remove('hide'); }
+  else fotoEl.classList.add('hide');
 }
 
 /* ============================================================
    CARDÁPIO — TEMPO REAL (por categorias)
-   refeitorio_cardapio/{AAAA-MM-DD} = { categorias: { catId: [opcoes] } }
    ============================================================ */
 let CARDAPIO_JA_TINHA_ITENS = null;
 function escutarCardapioHoje(){
@@ -658,7 +582,6 @@ function escutarCardapioHoje(){
     CARDAPIO_CATEGORIAS = snap.exists() ? (snap.data().categorias || {}) : {};
     renderizarCategoriasGerente();
     renderizarAreaFuncionario();
-
     const totalItens = Object.values(CARDAPIO_CATEGORIAS).reduce((s,arr)=>s+(arr?.length||0),0);
     const temItensAgora = totalItens > 0;
     if(CARDAPIO_JA_TINHA_ITENS === false && temItensAgora) notificarCardapioPublicado();
@@ -687,14 +610,15 @@ function renderizarCategoriasGerente(){
     const itensDia = CARDAPIO_CATEGORIAS[cat.id] || [];
     const itensCoringa = CONFIG.coringas[cat.id] || [];
     return `
-    <div class="secao-categoria">
+    <div class="secao-categoria" data-cat="${cat.id}">
       <div class="secao-titulo">
+        <div class="rotulo-cat">${cat.obrigatorio ? 'Obrigatório' : 'Opcional'} · escolhe até ${cat.maxEscolhas||1}</div>
         <h3>${cat.nome}</h3>
-        ${cat.obrigatorio ? '<span class="obrig">obrigatório</span>' : ''}
+        ${cat.instrucao ? `<div class="obrig">${cat.instrucao}</div>` : ''}
       </div>
       ${itensDia.length===0 && itensCoringa.length===0 ? `<p style="font-size:12.5px;color:var(--ink-soft);">Nenhuma opção hoje.</p>` : ''}
-      ${itensDia.map((p,i)=>renderizarCardOpcaoGerente(cat.id, p, i, false)).join('')}
-      ${itensCoringa.map((p,i)=>renderizarCardOpcaoGerente(cat.id, p, i, true)).join('')}
+      <div data-lista="dia">${itensDia.map((p,i)=>renderizarCardOpcaoGerente(cat.id, p, i, false)).join('')}</div>
+      <div data-lista="coringa">${itensCoringa.map((p,i)=>renderizarCardOpcaoGerente(cat.id, p, i, true)).join('')}</div>
       <button class="btn btn-fantasma btn-bloco" onclick="abrirModalOpcao('${cat.id}')">+ Adicionar em ${cat.nome}</button>
     </div>`;
   }).join('');
@@ -703,7 +627,8 @@ function renderizarCategoriasGerente(){
 function renderizarCardOpcaoGerente(catId, p, i, ehCoringa){
   const contagem = contarEscolhasDaOpcao(p.nome);
   return `
-    <div class="prato-card">
+    <div class="prato-card" data-cat="${catId}" data-idx="${i}" data-coringa="${ehCoringa}">
+      <span class="handle-arrastar" data-cat="${catId}" data-idx="${i}" data-coringa="${ehCoringa}">⠿</span>
       <div class="prato-foto" style="${p.foto ? `background-image:url('${p.foto}')` : ''}">${p.foto ? '' : '🍲'}</div>
       <div class="prato-info">
         <p class="nome">${p.nome}</p>
@@ -731,15 +656,64 @@ window.alternarEsgotado = async (catId, i) => {
 window.excluirOpcao = async (catId, i, ehCoringa) => {
   if(ehCoringa){
     if(!confirm('Remover essa opção coringa (fixa) dessa categoria?')) return;
-    CONFIG.coringas[catId].splice(i,1);
-    await salvarConfig();
-    renderizarCategoriasGerente();
+    CONFIG.coringas[catId].splice(i,1); await salvarConfig(); renderizarCategoriasGerente();
   } else {
     if(!confirm(`Remover "${CARDAPIO_CATEGORIAS[catId][i].nome}" do cardápio de hoje?`)) return;
-    CARDAPIO_CATEGORIAS[catId].splice(i,1);
-    await salvarCardapioHoje();
+    CARDAPIO_CATEGORIAS[catId].splice(i,1); await salvarCardapioHoje();
   }
 };
+
+/* ---------- Arrastar pra reordenar (gerente) ---------- */
+let ARRASTO = null;
+function ativarArrastoGerente(){
+  const container = document.getElementById('secoes-cardapio-gerente');
+  container.addEventListener('pointerdown', (e)=>{
+    const handle = e.target.closest('.handle-arrastar');
+    if(!handle) return;
+    const card = handle.closest('.prato-card');
+    const catId = handle.dataset.cat;
+    const ehCoringa = handle.dataset.coringa === 'true';
+    const indiceOrigem = parseInt(handle.dataset.idx);
+    const secao = card.closest('.secao-categoria');
+    const lista = secao.querySelector(`[data-lista="${ehCoringa?'coringa':'dia'}"]`);
+    const cards = Array.from(lista.querySelectorAll('.prato-card'));
+    ARRASTO = { catId, ehCoringa, indiceOrigem, card, cards, startY: e.clientY };
+    card.classList.add('arrastando');
+    card.setPointerCapture(e.pointerId);
+    document.addEventListener('pointermove', moverArrasto);
+    document.addEventListener('pointerup', soltarArrasto);
+  });
+}
+function moverArrasto(e){
+  if(!ARRASTO) return;
+  const delta = e.clientY - ARRASTO.startY;
+  ARRASTO.card.style.transform = `translateY(${delta}px)`;
+}
+async function soltarArrasto(e){
+  if(!ARRASTO) return;
+  const { catId, ehCoringa, indiceOrigem, card, cards } = ARRASTO;
+  const finalRect = card.getBoundingClientRect();
+  const centroFinal = finalRect.top + finalRect.height/2;
+  card.classList.remove('arrastando');
+  card.style.transform = '';
+  document.removeEventListener('pointermove', moverArrasto);
+  document.removeEventListener('pointerup', soltarArrasto);
+
+  let novoIndice = 0;
+  cards.filter(c=>c!==card).forEach(c=>{
+    const r = c.getBoundingClientRect();
+    if(r.top + r.height/2 < centroFinal) novoIndice++;
+  });
+
+  const lista = ehCoringa ? CONFIG.coringas[catId] : CARDAPIO_CATEGORIAS[catId];
+  if(lista && novoIndice !== indiceOrigem){
+    const [item] = lista.splice(indiceOrigem,1);
+    lista.splice(novoIndice,0,item);
+    if(ehCoringa) await salvarConfig(); else await salvarCardapioHoje();
+  }
+  renderizarCategoriasGerente();
+  ARRASTO = null;
+}
 
 /* ---------- Modal: adicionar / editar opção ---------- */
 window.abrirModalOpcao = (catId, indiceEdicao, ehCoringa) => {
@@ -760,24 +734,14 @@ window.abrirModalOpcao = (catId, indiceEdicao, ehCoringa) => {
         <input class="campo" id="np-nome" placeholder="Ex: Frango grelhado" value="${p?.nome || ''}">
         <label class="rotulo">Descrição</label>
         <textarea class="campo" id="np-desc" rows="2" placeholder="Ex: temperado com ervas">${p?.descricao || ''}</textarea>
-        ${CONFIG.controlePorcoes && !ehCoringa ? `
-          <label class="rotulo">Quantidade de porções disponíveis</label>
-          <input type="number" inputmode="numeric" class="campo" id="np-qtd" placeholder="0 = ilimitado" value="${p?.quantidadeTotal || ''}">
-        ` : ''}
-        ${CONFIG.iaCampos.vegetariano ? `
-          <div class="linha-config" style="border:none;padding:8px 0;">
-            <div class="txt"><b>Vegetariano</b></div>
-            <div class="switch ${p?.vegetariano?'on':''}" id="np-vegetariano-switch" onclick="this.classList.toggle('on')"><div class="bolinha"></div></div>
-          </div>` : ''}
-        ${CONFIG.iaCampos.alergenos ? `<label class="rotulo">Alérgenos</label>
-          <input class="campo" id="np-alergenos" placeholder="Ex: contém glúten" value="${p?.alergenos || ''}">` : ''}
-        ${CONFIG.iaCampos.porcaoSugerida ? `<label class="rotulo">Porção sugerida</label>
-          <input class="campo" id="np-porcao" placeholder="Ex: 200g" value="${p?.porcaoSugerida || ''}">` : ''}
-        ${!editando ? `
-        <div class="linha-config" style="border:none;padding:8px 0;">
-          <div class="txt"><b>🔁 Opção coringa</b><span>Fica sempre disponível, todo dia, sem precisar recadastrar</span></div>
-          <div class="switch" id="np-coringa-switch" onclick="this.classList.toggle('on')"><div class="bolinha"></div></div>
-        </div>` : ''}
+        ${CONFIG.controlePorcoes && !ehCoringa ? `<label class="rotulo">Quantidade de porções disponíveis</label>
+          <input type="number" inputmode="numeric" class="campo" id="np-qtd" placeholder="0 = ilimitado" value="${p?.quantidadeTotal || ''}">` : ''}
+        ${CONFIG.iaCampos.vegetariano ? `<div class="linha-config" style="border:none;padding:8px 0;"><div class="txt"><b>Vegetariano</b></div>
+          <div class="switch ${p?.vegetariano?'on':''}" id="np-vegetariano-switch" onclick="this.classList.toggle('on')"><div class="bolinha"></div></div></div>` : ''}
+        ${CONFIG.iaCampos.alergenos ? `<label class="rotulo">Alérgenos</label><input class="campo" id="np-alergenos" placeholder="Ex: contém glúten" value="${p?.alergenos || ''}">` : ''}
+        ${CONFIG.iaCampos.porcaoSugerida ? `<label class="rotulo">Porção sugerida</label><input class="campo" id="np-porcao" placeholder="Ex: 200g" value="${p?.porcaoSugerida || ''}">` : ''}
+        ${!editando ? `<div class="linha-config" style="border:none;padding:8px 0;"><div class="txt"><b>🔁 Opção coringa</b><span>Fica sempre disponível, todo dia</span></div>
+          <div class="switch" id="np-coringa-switch" onclick="this.classList.toggle('on')"><div class="bolinha"></div></div></div>` : ''}
         <div style="margin-top:18px;">
           <button class="btn btn-primario btn-bloco" onclick="confirmarOpcao(${editando?indiceEdicao:'null'}, ${!!ehCoringa})">${editando ? 'Salvar alterações' : 'Adicionar'}</button>
         </div>
@@ -798,11 +762,8 @@ window.confirmarOpcao = async (indiceEdicao, ehCoringa) => {
 
   let fotoUrl = editando ? ((ehCoringa ? CONFIG.coringas[catId][indiceEdicao] : CARDAPIO_CATEGORIAS[catId][indiceEdicao]).foto || "") : "";
   if(fotoInput.files[0]){
-    try{
-      toast('Enviando foto…');
-      const caminho = `${hojeISO()}/${Date.now()}_${fotoInput.files[0].name}`;
-      fotoUrl = await uploadFotoSupabase(fotoInput.files[0], caminho);
-    }catch(e){ toast('Erro ao enviar a foto — salvo sem foto'); }
+    try{ toast('Enviando foto…'); const caminho = `${hojeISO()}/${Date.now()}_${fotoInput.files[0].name}`; fotoUrl = await uploadFotoSupabase(fotoInput.files[0], caminho); }
+    catch(e){ toast('Erro ao enviar a foto — salvo sem foto'); }
   }
 
   const dadosOpcao = {
@@ -812,16 +773,13 @@ window.confirmarOpcao = async (indiceEdicao, ehCoringa) => {
     alergenos: CONFIG.iaCampos.alergenos ? (document.getElementById('np-alergenos')?.value.trim() || '') : '',
     porcaoSugerida: CONFIG.iaCampos.porcaoSugerida ? (document.getElementById('np-porcao')?.value.trim() || '') : ''
   };
-
   const marcarComoCoringa = !editando && document.getElementById('np-coringa-switch')?.classList.contains('on');
 
   if(marcarComoCoringa){
     if(!CONFIG.coringas[catId]) CONFIG.coringas[catId] = [];
-    CONFIG.coringas[catId].push(dadosOpcao);
-    await salvarConfig();
+    CONFIG.coringas[catId].push(dadosOpcao); await salvarConfig();
   } else if(ehCoringa && editando){
-    CONFIG.coringas[catId][indiceEdicao] = dadosOpcao;
-    await salvarConfig();
+    CONFIG.coringas[catId][indiceEdicao] = dadosOpcao; await salvarConfig();
   } else {
     if(!CARDAPIO_CATEGORIAS[catId]) CARDAPIO_CATEGORIAS[catId] = [];
     if(editando) CARDAPIO_CATEGORIAS[catId][indiceEdicao] = dadosOpcao;
@@ -848,8 +806,7 @@ window.copiarCardapioOntem = async () => {
 };
 
 /* ============================================================
-   IA — formatos e prompts (por categoria, sem tag "categoria" pois
-   a seção já define isso)
+   IA — formatos e prompts
    ============================================================ */
 function montarFormatoJsonPrato(){
   let campos = `"nome":"...","descricao":"..."`;
@@ -872,13 +829,10 @@ window.preencherComIA = async () => {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type':'application/json', 'x-api-key':CONFIG.iaApiKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6', max_tokens: 500,
-        messages: [{ role:'user', content: [
-          { type:'image', source:{ type:'base64', media_type:fotoInput.files[0].type, data:base64 } },
-          { type:'text', text:`Veja esta foto de um item de ${cat.nome.toLowerCase()} de um restaurante corporativo (pode ser o prato pronto ou uma etiqueta/quadro escrito). Responda SOMENTE com um JSON, sem markdown, sem texto antes ou depois, no formato: ${formato}` }
-        ]}]
-      })
+      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:500, messages:[{ role:'user', content:[
+        { type:'image', source:{ type:'base64', media_type:fotoInput.files[0].type, data:base64 } },
+        { type:'text', text:`Veja esta foto de um item de ${cat.nome.toLowerCase()} de um restaurante corporativo. Responda SOMENTE com um JSON, sem markdown, sem texto antes ou depois, no formato: ${formato}` }
+      ]}]})
     });
     const dados = await resp.json();
     if(!resp.ok) throw new Error(dados.error?.message || 'Erro na API');
@@ -890,27 +844,23 @@ window.preencherComIA = async () => {
     if(CONFIG.iaCampos.alergenos && document.getElementById('np-alergenos')) document.getElementById('np-alergenos').value = resultado.alergenos || '';
     if(CONFIG.iaCampos.porcaoSugerida && document.getElementById('np-porcao')) document.getElementById('np-porcao').value = resultado.porcaoSugerida || '';
     statusEl.textContent = 'Preenchido! Confira antes de salvar.';
-  }catch(e){
-    console.error(e);
-    statusEl.textContent = 'Não consegui analisar a foto: ' + (e.message||e);
-  }
+  }catch(e){ console.error(e); statusEl.textContent = 'Não consegui analisar a foto: ' + (e.message||e); }
 };
 
-/* ---------- Cardápio completo por IA (prompt manual → colar código) ---------- */
+/* ---------- Cardápio completo por IA ---------- */
 function montarPromptCardapioCompleto(){
   const formato = montarFormatoJsonPrato();
   const ativas = categoriasAtivas();
-  const chaves = ativas.map(c=>`"${c.id}"`).join(', ');
-  return `Veja a(s) foto(s) do cardápio de hoje de um restaurante corporativo self-service (pode ser foto de cada item, ou de um quadro/papel com a lista escrita à mão). O cardápio é organizado nestas categorias: ${ativas.map(c=>`${c.nome} (chave "${c.id}")`).join(', ')}.
+  return `Veja a(s) foto(s) do cardápio de hoje de um restaurante corporativo self-service (foto de cada item, ou de um quadro/papel escrito à mão, ex: cardápio impresso do dia). O cardápio é organizado nestas categorias: ${ativas.map(c=>`${c.nome} (chave "${c.id}")`).join(', ')}.
 
 Identifique os itens de cada categoria e devolva SOMENTE um objeto JSON, sem markdown, sem texto antes ou depois, no formato:
-{ ${ativas.map(c=>`"${c.id}": [${formato}, ...]`).join(', ')} }
+{ ${ativas.map(c=>`"${c.id}": {"itens":[${formato}, ...], "maxEscolhas": N}`).join(', ')} }
 
-Cada chave (${chaves}) deve conter uma lista de itens daquela categoria. Se não identificar nada pra alguma categoria, devolva lista vazia []. Regras dos campos:
-- "nome": nome curto e claro do item
-- "descricao": detalhe/tempero/acompanhamento, de forma resumida
+Para cada categoria, além da lista de itens, calcule "maxEscolhas": um número sugerindo quantas opções DAQUELA categoria a pessoa pode escolher, com base em quantos itens você identificou nela (ex: se viu 4 proteínas diferentes, pode sugerir 2; se viu só 1 tipo de arroz, sugira 1). Se não identificar nada pra alguma categoria, devolva itens: [] e maxEscolhas: 1. Regras dos campos de cada item:
+- "nome": nome curto e claro
+- "descricao": detalhe/tempero, resumido
 ${CONFIG.iaCampos.vegetariano ? '- "vegetariano": true ou false' : ''}
-${CONFIG.iaCampos.alergenos ? '- "alergenos": alérgenos comuns identificáveis (ou "" se não souber)' : ''}
+${CONFIG.iaCampos.alergenos ? '- "alergenos": alérgenos comuns (ou "" se não souber)' : ''}
 ${CONFIG.iaCampos.porcaoSugerida ? '- "porcaoSugerida": estimativa, ex: "200g" (ou "" se não souber)' : ''}
 
 Responda só com o objeto JSON, nada mais.`;
@@ -924,18 +874,16 @@ window.abrirModalCardapioIA = () => {
       <div class="modal">
         <div class="modal-titulo"><h3>Cardápio completo por IA</h3><button class="icon-btn" onclick="fecharModal()">✕</button></div>
         <p style="font-size:13px;color:var(--ink-soft);line-height:1.5;margin-bottom:14px;">
-          1. Copie o prompt abaixo.<br>
-          2. Cole numa IA (Claude, ChatGPT etc.) e anexe a(s) foto(s) do cardápio de hoje.<br>
-          3. Copie o código que a IA devolver e cole no campo abaixo.<br>
-          4. O app organiza tudo nas categorias certas — só falta adicionar a foto de cada item depois.
+          1. Copie o prompt abaixo.<br>2. Cole numa IA (Claude, ChatGPT etc.) e anexe a(s) foto(s) do cardápio de hoje.<br>
+          3. Copie o código que a IA devolver e cole no campo abaixo.<br>4. Revise as quantidades sugeridas antes de aplicar.
         </p>
         <label class="rotulo">Prompt pronto</label>
         <textarea class="campo" id="ia-prompt-texto" rows="7" readonly style="font-size:12px;">${prompt}</textarea>
         <button class="btn btn-fantasma btn-bloco" onclick="copiarPromptIA()">📋 Copiar prompt</button>
         <label class="rotulo" style="margin-top:18px;">Cole aqui o código que a IA devolveu</label>
-        <textarea class="campo" id="ia-codigo-colado" rows="6" placeholder='{"proteina":[...], "salada":[...]}'></textarea>
+        <textarea class="campo" id="ia-codigo-colado" rows="6" placeholder='{"proteina":{"itens":[...],"maxEscolhas":2}}'></textarea>
         <p id="ia-cardapio-status" style="font-size:12px;color:var(--ink-soft);margin:-4px 0 10px;"></p>
-        <button class="btn btn-primario btn-bloco" onclick="criarCardapioDoCodigo()">Criar cardápio a partir do código</button>
+        <button class="btn btn-primario btn-bloco" onclick="lerCodigoIA()">Ler código</button>
       </div>
     </div>`;
 };
@@ -945,70 +893,111 @@ window.copiarPromptIA = () => {
   try{ document.execCommand('copy'); toast('Prompt copiado!'); }
   catch(e){ navigator.clipboard?.writeText(el.value).then(()=>toast('Prompt copiado!')).catch(()=>toast('Selecione e copie manualmente')); }
 };
-window.criarCardapioDoCodigo = async () => {
+
+window.lerCodigoIA = () => {
   const statusEl = document.getElementById('ia-cardapio-status');
   const bruto = document.getElementById('ia-codigo-colado').value.trim();
   if(!bruto){ toast('Cole o código primeiro'); return; }
   try{
     const limpo = bruto.replace(/```json|```/g,'').trim();
     const objeto = JSON.parse(limpo);
-    let total = 0;
-    Object.keys(objeto).forEach(catId=>{
-      if(!Array.isArray(objeto[catId])) return;
-      const itens = objeto[catId].map(item => ({
-        nome: item.nome || 'Sem nome', descricao: item.descricao || '', foto:'', quantidadeTotal:0, esgotado:false,
-        vegetariano: !!item.vegetariano, alergenos: item.alergenos || '', porcaoSugerida: item.porcaoSugerida || ''
-      }));
-      CARDAPIO_CATEGORIAS[catId] = [...(CARDAPIO_CATEGORIAS[catId]||[]), ...itens];
-      total += itens.length;
-    });
-    await salvarCardapioHoje();
-    fecharModal();
-    renderizarCategoriasGerente();
-    toast(`${total} itens criados! Falta só adicionar as fotos.`);
+    SUGESTOES_MAX_PENDENTES = objeto;
+    mostrarRevisaoQuantidades(objeto);
   }catch(e){
     console.error(e);
     statusEl.textContent = 'Não consegui ler esse código: ' + (e.message||e);
   }
 };
 
+function mostrarRevisaoQuantidades(objeto){
+  const raiz = document.getElementById('raiz-modal');
+  const chaves = Object.keys(objeto).filter(k => CONFIG.categorias.some(c=>c.id===k));
+  raiz.innerHTML = `
+    <div class="overlay">
+      <div class="modal">
+        <div class="modal-titulo"><h3>Confira antes de aplicar</h3></div>
+        <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;">A IA sugeriu essas quantidades de escolha por categoria. Ajuste se quiser antes de criar o cardápio.</p>
+        ${chaves.map(catId=>{
+          const cat = CONFIG.categorias.find(c=>c.id===catId);
+          const dados = objeto[catId];
+          const qtdItens = (dados.itens||[]).length;
+          const sugestao = dados.maxEscolhas || 1;
+          return `<div class="categoria-config-item">
+            <div class="linha1"><span style="font-weight:700;">${cat.nome}</span><span style="font-size:12px;color:var(--ink-soft);">${qtdItens} itens identificados</span></div>
+            <div class="qtd-escolhas"><span style="font-size:12.5px;">Pode escolher até</span><input type="number" min="1" max="6" id="rev-max-${catId}" value="${sugestao}"></div>
+          </div>`;
+        }).join('')}
+        <button class="btn btn-primario btn-bloco" style="margin-top:14px;" onclick="aplicarCardapioDaRevisao()">Criar cardápio com essas quantidades</button>
+        <button class="btn btn-fantasma btn-bloco" style="margin-top:8px;" onclick="fecharModal()">Cancelar</button>
+      </div>
+    </div>`;
+}
+
+window.aplicarCardapioDaRevisao = async () => {
+  const objeto = SUGESTOES_MAX_PENDENTES;
+  if(!objeto) return;
+  let total = 0;
+  for(const catId of Object.keys(objeto)){
+    const catIndex = CONFIG.categorias.findIndex(c=>c.id===catId);
+    if(catIndex===-1) continue;
+    const dados = objeto[catId];
+    const inputMax = document.getElementById(`rev-max-${catId}`);
+    const maxEscolhido = inputMax ? (parseInt(inputMax.value)||1) : (dados.maxEscolhas||1);
+    CONFIG.categorias[catIndex].maxEscolhas = maxEscolhido;
+
+    const itens = (dados.itens||[]).map(item => ({
+      nome: item.nome || 'Sem nome', descricao: item.descricao || '', foto:'', quantidadeTotal:0, esgotado:false,
+      vegetariano: !!item.vegetariano, alergenos: item.alergenos || '', porcaoSugerida: item.porcaoSugerida || ''
+    }));
+    CARDAPIO_CATEGORIAS[catId] = [...(CARDAPIO_CATEGORIAS[catId]||[]), ...itens];
+    total += itens.length;
+  }
+  await salvarConfig();
+  await salvarCardapioHoje();
+  SUGESTOES_MAX_PENDENTES = null;
+  fecharModal();
+  renderizarCategoriasGerente();
+  toast(`${total} itens criados! Falta só adicionar as fotos.`);
+};
+
 /* ============================================================
-   FUNCIONÁRIO — montar prato por categorias
+   FUNCIONÁRIO — montar prato (seleção múltipla configurável)
    ============================================================ */
 function renderizarAreaFuncionario(){
   if(PEDIDO_ATUAL){ renderizarConfirmacaoFuncionario(); return; }
-
   const box = document.getElementById('area-funcionario');
   const barra = document.getElementById('barra-confirmar-prato');
 
   if(CONFIG.janelaPedidos && !dentroDaJanela()){
     box.innerHTML = `<div class="vazio"><span class="em">🕐</span>Pedidos abrem das <b>${CONFIG.horaAbertura}</b> às <b>${CONFIG.horaFechamento}</b>.<br>Volte dentro desse horário.</div>`;
-    barra.classList.add('hide');
-    return;
+    barra.classList.add('hide'); return;
   }
-
   const ativas = categoriasAtivas().filter(cat => itensDaCategoria(cat.id).length > 0);
   if(ativas.length===0){
     box.innerHTML = `<div class="vazio"><span class="em">🕐</span>O cardápio de hoje ainda não foi publicado.<br>Volte em instantes.</div>`;
-    barra.classList.add('hide');
-    return;
+    barra.classList.add('hide'); return;
   }
 
   box.innerHTML = ativas.map(cat => {
     const itens = itensDaCategoria(cat.id);
+    const max = cat.maxEscolhas || 1;
+    const tituloEscolha = max > 1 ? `Escolha até ${max} opções` : 'Escolha 1 opção';
     return `
     <div class="secao-categoria">
-      <div class="secao-titulo"><h3>${cat.nome}</h3>${cat.obrigatorio ? '<span class="obrig">escolha 1</span>' : '<span class="obrig">opcional</span>'}</div>
+      <div class="secao-titulo">
+        <div class="rotulo-cat">${cat.nome}${cat.obrigatorio ? '' : ' · opcional'}</div>
+        <h3>${cat.instrucao || tituloEscolha}</h3>
+      </div>
       ${itens.map(p => {
-        const selecionado = SELECOES[cat.id] === p.nome;
+        const selecionado = (SELECOES[cat.id]||[]).includes(p.nome);
         return `
-        <div class="opcao-linha ${selecionado?'selecionada':''} ${p.esgotado?'esgotada':''}" onclick="${p.esgotado?'':`selecionarOpcao('${cat.id}','${p.nome.replace(/'/g,"\\'")}')`}">
-          <div class="prato-foto" style="${p.foto ? `background-image:url('${p.foto}')` : ''}">${p.foto ? '' : '🍽️'}</div>
-          <div class="prato-info">
-            <p class="nome" style="font-size:14.5px;">${p.nome}</p>
-            <p class="desc">${p.descricao || ''}${p.coringa ? ' · sempre disponível' : ''}</p>
+        <div class="opcao-card ${selecionado?'selecionada':''} ${p.esgotado?'esgotada':''}" onclick="${p.esgotado?'':`selecionarOpcao('${cat.id}','${p.nome.replace(/'/g,"\\'")}')`}">
+          <div class="foto-grande" style="${p.foto ? `background-image:url('${p.foto}')` : ''}">${p.foto ? '' : '🍽️'}<div class="check-selo">✓</div></div>
+          <div class="texto">
+            <p class="nome serif">${p.nome}</p>
+            <p class="desc">${p.descricao || ''}</p>
+            ${p.coringa ? `<p class="coringa-nota">🔁 sempre disponível</p>` : ''}
           </div>
-          <div class="radio-fake">${selecionado?'✓':''}</div>
         </div>`;
       }).join('')}
     </div>`;
@@ -1019,26 +1008,39 @@ function renderizarAreaFuncionario(){
 }
 
 window.selecionarOpcao = (catId, nome) => {
-  SELECOES[catId] = (SELECOES[catId] === nome) ? undefined : nome;
+  const cat = CONFIG.categorias.find(c=>c.id===catId);
+  const max = cat?.maxEscolhas || 1;
+  if(!SELECOES[catId]) SELECOES[catId] = [];
+  const idx = SELECOES[catId].indexOf(nome);
+  if(idx > -1){
+    SELECOES[catId].splice(idx,1);
+  } else {
+    if(SELECOES[catId].length >= max){
+      if(max===1) SELECOES[catId] = [nome];
+      else { toast(`Você já escolheu o máximo (${max}) em ${cat.nome}`); return; }
+    } else {
+      SELECOES[catId].push(nome);
+    }
+  }
   renderizarAreaFuncionario();
 };
 
 function atualizarBotaoConfirmar(){
   const btn = document.getElementById('btn-confirmar-prato');
   const obrigatorias = categoriasAtivas().filter(c => c.obrigatorio && itensDaCategoria(c.id).length>0);
-  const faltando = obrigatorias.some(c => !SELECOES[c.id]);
+  const faltando = obrigatorias.some(c => !(SELECOES[c.id]||[]).length);
   btn.disabled = faltando;
   btn.textContent = faltando ? 'Escolha as opções obrigatórias' : 'Confirmar meu prato';
 }
 
 window.confirmarPratoMontado = async () => {
   const obrigatorias = categoriasAtivas().filter(c => c.obrigatorio && itensDaCategoria(c.id).length>0);
-  if(obrigatorias.some(c => !SELECOES[c.id])){ toast('Escolha todas as opções obrigatórias'); return; }
+  if(obrigatorias.some(c => !(SELECOES[c.id]||[]).length)){ toast('Escolha todas as opções obrigatórias'); return; }
 
   const codigo = String(Math.floor(1000 + Math.random()*9000));
-  const escolhas = { ...SELECOES };
-  Object.keys(escolhas).forEach(k => { if(!escolhas[k]) delete escolhas[k]; });
-  const resumoTexto = categoriasAtivas().filter(c=>escolhas[c.id]).map(c=>escolhas[c.id]).join(' + ');
+  const escolhas = {};
+  Object.keys(SELECOES).forEach(k => { if(SELECOES[k] && SELECOES[k].length) escolhas[k] = [...SELECOES[k]]; });
+  const resumoTexto = categoriasAtivas().filter(c=>escolhas[c.id]).map(c=>escolhas[c.id].join(', ')).join(' + ');
 
   const pedido = {
     data: hojeISO(), escolhas, resumoTexto,
@@ -1061,11 +1063,10 @@ window.confirmarPratoMontado = async () => {
 function renderizarConfirmacaoFuncionario(){
   const box = document.getElementById('area-funcionario');
   document.getElementById('barra-confirmar-prato').classList.add('hide');
-  const linhasResumo = Object.entries(PEDIDO_ATUAL.escolhas || {}).map(([catId, nome])=>{
+  const linhasResumo = Object.entries(PEDIDO_ATUAL.escolhas || {}).map(([catId, nomes])=>{
     const cat = CONFIG.categorias.find(c=>c.id===catId);
-    return `<div><b>${cat?.nome || catId}:</b> ${nome}</div>`;
+    return `<div><b>${cat?.nome || catId}:</b> ${Array.isArray(nomes)?nomes.join(', '):nomes}</div>`;
   }).join('');
-
   box.innerHTML = `
     <div class="confirmacao-box">
       <div class="selo">✅</div>
@@ -1079,13 +1080,10 @@ function renderizarConfirmacaoFuncionario(){
     ${CONFIG.campoSugestoes ? renderizarBlocoSugestao() : ''}
   `;
 }
-
 function renderizarBlocoSugestao(){
-  return `<div style="margin-top:22px;">
-    <label class="rotulo">Sugestões para melhorar</label>
+  return `<div style="margin-top:22px;"><label class="rotulo">Sugestões para melhorar</label>
     <textarea class="campo" id="campo-sugestao" rows="3" placeholder="O que podemos fazer melhor?"></textarea>
-    <button class="btn btn-amber btn-bloco" onclick="enviarSugestao()">Enviar sugestão</button>
-  </div>`;
+    <button class="btn btn-amber btn-bloco" onclick="enviarSugestao()">Enviar sugestão</button></div>`;
 }
 window.enviarSugestao = async () => {
   const texto = document.getElementById('campo-sugestao').value.trim();
@@ -1094,7 +1092,6 @@ window.enviarSugestao = async () => {
   toast('Sugestão enviada, obrigado!');
   document.getElementById('campo-sugestao').value = '';
 };
-
 window.trocarPedido = async () => {
   if(PEDIDO_ATUAL?.id) await deleteDoc(doc(db, PREFIXO+"pedidos", PEDIDO_ATUAL.id));
   PEDIDO_ATUAL = null;
@@ -1120,7 +1117,7 @@ function escutarPedidosHoje(){
   });
 }
 function contarEscolhasDaOpcao(nome){
-  return PEDIDOS_HOJE.filter(p => Object.values(p.escolhas||{}).includes(nome)).length;
+  return PEDIDOS_HOJE.filter(p => Object.values(p.escolhas||{}).some(arr => (Array.isArray(arr)?arr:[arr]).includes(nome))).length;
 }
 let JA_ESGOTANDO = false;
 async function verificarEsgotamentoAutomatico(){
@@ -1157,14 +1154,15 @@ window.trocarTabGerente = (tab) => {
 function renderizarRelatorio(){
   const box = document.getElementById('painel-relatorio');
   const total = PEDIDOS_HOJE.length;
-
   const contagemPorCategoria = {};
   categoriasAtivas().forEach(cat=>{
     const contagem = {};
-    PEDIDOS_HOJE.forEach(p=>{ const escolha = p.escolhas?.[cat.id]; if(escolha) contagem[escolha]=(contagem[escolha]||0)+1; });
+    PEDIDOS_HOJE.forEach(p=>{
+      const escolha = p.escolhas?.[cat.id];
+      (Array.isArray(escolha)?escolha:(escolha?[escolha]:[])).forEach(nome=>{ contagem[nome]=(contagem[nome]||0)+1; });
+    });
     if(Object.keys(contagem).length) contagemPorCategoria[cat.nome] = contagem;
   });
-
   const contagemEmpresas = {};
   PEDIDOS_HOJE.forEach(p => { const nome = p.empresaNome || 'Não informado'; contagemEmpresas[nome] = (contagemEmpresas[nome]||0)+1; });
 
@@ -1173,46 +1171,30 @@ function renderizarRelatorio(){
       <div class="stat-box"><div class="num">${total}</div><div class="lbl">Pedidos hoje</div></div>
       <div class="stat-box"><div class="num">${Object.keys(contagemEmpresas).length}</div><div class="lbl">Empresas</div></div>
     </div>
-
     ${Object.entries(contagemPorCategoria).map(([catNome, contagem])=>{
       const maior = Math.max(1, ...Object.values(contagem));
       return `<label class="rotulo">${catNome}</label>
         ${Object.entries(contagem).map(([nome,qtd])=>`
-          <div class="barra-item">
-            <div class="nome">${nome}</div>
+          <div class="barra-item"><div class="nome">${nome}</div>
             <div class="barra-fundo"><div class="barra-preenchida" style="width:${(qtd/maior)*100}%"></div></div>
-            <div class="qtd">${qtd}</div>
-          </div>`).join('')}`;
+            <div class="qtd">${qtd}</div></div>`).join('')}`;
     }).join('') || '<p style="color:var(--ink-soft);font-size:13px;">Nenhum pedido ainda.</p>'}
-
-    ${Object.keys(contagemEmpresas).length ? `
-      <label class="rotulo" style="margin-top:20px;">Por empresa</label>
+    ${Object.keys(contagemEmpresas).length ? `<label class="rotulo" style="margin-top:20px;">Por empresa</label>
       ${Object.entries(contagemEmpresas).map(([nome,qtd])=>`
-        <div class="barra-item">
-          <div class="nome">${nome}</div>
+        <div class="barra-item"><div class="nome">${nome}</div>
           <div class="barra-fundo"><div class="barra-preenchida" style="width:${(qtd/total)*100}%"></div></div>
-          <div class="qtd">${qtd}</div>
-        </div>`).join('')}
-    ` : ''}
-
+          <div class="qtd">${qtd}</div></div>`).join('')}` : ''}
     <label class="rotulo" style="margin-top:26px;">Pedidos de hoje (retirada)</label>
     ${PEDIDOS_HOJE.length ? PEDIDOS_HOJE.map(p=>`
-      <div class="linha-config">
-        <div class="txt"><b>${p.funcionarioNome}</b><span>${p.resumoTexto || ''}${p.codigoRetirada ? ' · cód. '+p.codigoRetirada : ''}</span></div>
-        <div class="switch ${p.retirado?'on':''}" onclick="alternarRetirado('${p.id}', ${!p.retirado})"><div class="bolinha"></div></div>
-      </div>`).join('') : '<p style="color:var(--ink-soft);font-size:13px;">Nenhum pedido ainda.</p>'}
-
+      <div class="linha-config"><div class="txt"><b>${p.funcionarioNome}</b><span>${p.resumoTexto || ''}${p.codigoRetirada ? ' · cód. '+p.codigoRetirada : ''}</span></div>
+        <div class="switch ${p.retirado?'on':''}" onclick="alternarRetirado('${p.id}', ${!p.retirado})"><div class="bolinha"></div></div></div>`).join('') : '<p style="color:var(--ink-soft);font-size:13px;">Nenhum pedido ainda.</p>'}
     <label class="rotulo" style="margin-top:26px;">Relatório por período</label>
-    <div style="display:flex;gap:8px;">
-      <input type="date" class="campo" id="rp-inicio">
-      <input type="date" class="campo" id="rp-fim">
-    </div>
+    <div style="display:flex;gap:8px;"><input type="date" class="campo" id="rp-inicio"><input type="date" class="campo" id="rp-fim"></div>
     <button class="btn btn-fantasma btn-bloco" onclick="buscarRelatorioPeriodo()">Buscar período</button>
     <div id="resultado-periodo"></div>
   `;
 }
 window.alternarRetirado = async (pedidoId, novoValor) => { await updateDoc(doc(db, PREFIXO+"pedidos", pedidoId), { retirado: novoValor }); };
-
 window.buscarRelatorioPeriodo = async () => {
   const inicio = document.getElementById('rp-inicio').value;
   const fim = document.getElementById('rp-fim').value;
@@ -1231,11 +1213,9 @@ window.buscarRelatorioPeriodo = async () => {
       <div class="stat-box"><div class="num">${Object.keys(porEmpresa).length}</div><div class="lbl">Empresas</div></div>
     </div>
     ${Object.entries(porEmpresa).map(([nome,qtd])=>`
-      <div class="barra-item">
-        <div class="nome">${nome}</div>
+      <div class="barra-item"><div class="nome">${nome}</div>
         <div class="barra-fundo"><div class="barra-preenchida" style="width:${(qtd/Math.max(1,totalPeriodo))*100}%"></div></div>
-        <div class="qtd">${qtd}</div>
-      </div>`).join('') || '<p style="color:var(--ink-soft);font-size:13px;">Nenhum pedido no período.</p>'}
+        <div class="qtd">${qtd}</div></div>`).join('') || '<p style="color:var(--ink-soft);font-size:13px;">Nenhum pedido no período.</p>'}
   `;
 };
 
@@ -1247,18 +1227,13 @@ async function renderizarEquipe(){
   box.innerHTML = '<p style="color:var(--ink-soft);font-size:13px;">Carregando…</p>';
   const snap = await getDocs(collection(db, PREFIXO+"funcionarios"));
   const funcionarios = snap.docs.map(d=>({ id:d.id, ...d.data() }));
-  if(funcionarios.length===0){
-    box.innerHTML = `<div class="vazio"><span class="em">🧑‍🏭</span>Nenhum funcionário identificado ainda.</div>`;
-    return;
-  }
+  if(funcionarios.length===0){ box.innerHTML = `<div class="vazio"><span class="em">🧑‍🏭</span>Nenhum funcionário identificado ainda.</div>`; return; }
   funcionarios.sort((a,b)=> (a.nome||'').localeCompare(b.nome||''));
   box.innerHTML = funcionarios.map(f => `
     <div class="prato-card" style="align-items:center;">
       <div class="prato-foto" style="${f.foto ? `background-image:url('${f.foto}')` : ''}">${f.foto ? '' : '🧑‍🏭'}</div>
-      <div class="prato-info">
-        <p class="nome" style="font-size:15px;">${f.nome}</p>
-        <p class="desc">${f.empresaNome || ''}${f.matricula ? ' · matrícula '+f.matricula : ''}${f.telefone ? ' · '+f.telefone : ''}</p>
-      </div>
+      <div class="prato-info"><p class="nome" style="font-size:15px;">${f.nome}</p>
+        <p class="desc">${f.empresaNome || ''}${f.matricula ? ' · matrícula '+f.matricula : ''}${f.telefone ? ' · '+f.telefone : ''}</p></div>
     </div>`).join('');
 }
 
@@ -1276,9 +1251,14 @@ function renderizarConfig(){
             <input class="nome-cat" value="${cat.nome}" onchange="renomearCategoria(${i}, this.value)">
             <button class="mini-btn" onclick="removerCategoria(${i})">🗑️</button>
           </div>
+          <input class="campo campo-instrucao" placeholder="Texto customizado (ex: Escolha sua proteína do dia)" value="${cat.instrucao||''}" onchange="definirInstrucao(${i}, this.value)">
           <div class="linha2">
             <label><input type="checkbox" ${cat.ativo?'checked':''} onchange="alternarCategoriaCampo(${i},'ativo',this.checked)"> Ativa</label>
             <label><input type="checkbox" ${cat.obrigatorio?'checked':''} onchange="alternarCategoriaCampo(${i},'obrigatorio',this.checked)"> Obrigatória</label>
+          </div>
+          <div class="qtd-escolhas"><span>Pode escolher até</span>
+            <input type="number" min="1" max="6" value="${cat.maxEscolhas||1}" onchange="definirMaxEscolhas(${i}, this.value)">
+            <span>opções</span>
           </div>
         </div>`).join('')}
     </div>
@@ -1289,34 +1269,29 @@ function renderizarConfig(){
       ${[{v:'nome_empresa',l:'Nome + empresa'},{v:'matricula',l:'Nome + matrícula'},{v:'telefone',l:'Telefone (WhatsApp)'}]
         .map(o=>`<button type="button" class="chip ${CONFIG.identificacao===o.v?'ativo':''}" onclick="setIdentificacao('${o.v}')">${o.l}</button>`).join('')}
     </div>
-
     <label class="rotulo">Formas de pagamento aceitas</label>
     <div class="chip-select">
       ${[{v:'fatura_empresa',l:'Fatura mensal p/ empresa'},{v:'pix_dinheiro',l:'PIX / dinheiro no balcão'},{v:'vr_va',l:'Vale-refeição (VR/VA)'}]
         .map(o=>`<button type="button" class="chip ${CONFIG.pagamentos.includes(o.v)?'ativo':''}" onclick="alternarPagamento('${o.v}')">${o.l}</button>`).join('')}
     </div>
-
     <div class="linha-config"><div class="txt"><b>Confirmar presença</b><span>Funcionário confirma que vai almoçar</span></div>
       <div class="switch ${CONFIG.confirmarPresenca?'on':''}" onclick="alternarConfig('confirmarPresenca')"><div class="bolinha"></div></div></div>
-    <div class="linha-config"><div class="txt"><b>Avaliação pós-almoço</b><span>Carinhas de satisfação depois do pedido</span></div>
+    <div class="linha-config"><div class="txt"><b>Avaliação pós-almoço</b><span>Carinhas de satisfação</span></div>
       <div class="switch ${CONFIG.feedbackPosAlmoco?'on':''}" onclick="alternarConfig('feedbackPosAlmoco')"><div class="bolinha"></div></div></div>
     <div class="linha-config"><div class="txt"><b>Campo de sugestões</b><span>Funcionário pode sugerir melhorias</span></div>
       <div class="switch ${CONFIG.campoSugestoes?'on':''}" onclick="alternarConfig('campoSugestoes')"><div class="bolinha"></div></div></div>
-    <div class="linha-config"><div class="txt"><b>Controle de porções</b><span>Opção esgota sozinha ao atingir a quantidade</span></div>
+    <div class="linha-config"><div class="txt"><b>Controle de porções</b><span>Opção esgota sozinha</span></div>
       <div class="switch ${CONFIG.controlePorcoes?'on':''}" onclick="alternarConfig('controlePorcoes')"><div class="bolinha"></div></div></div>
-    <div class="linha-config"><div class="txt"><b>Restringir horário de pedidos</b><span>Só permite escolher dentro da janela</span></div>
+    <div class="linha-config"><div class="txt"><b>Restringir horário de pedidos</b><span>Só permite escolher na janela</span></div>
       <div class="switch ${CONFIG.janelaPedidos?'on':''}" onclick="alternarConfig('janelaPedidos')"><div class="bolinha"></div></div></div>
-    ${CONFIG.janelaPedidos ? `
-      <div style="display:flex;gap:8px;margin-bottom:10px;">
-        <div style="flex:1;"><label class="rotulo">Abre às</label><input type="time" class="campo" id="cfg-hora-abertura" value="${CONFIG.horaAbertura}" onchange="salvarHorarios()"></div>
-        <div style="flex:1;"><label class="rotulo">Fecha às</label><input type="time" class="campo" id="cfg-hora-fechamento" value="${CONFIG.horaFechamento}" onchange="salvarHorarios()"></div>
-      </div>` : ''}
+    ${CONFIG.janelaPedidos ? `<div style="display:flex;gap:8px;margin-bottom:10px;">
+      <div style="flex:1;"><label class="rotulo">Abre às</label><input type="time" class="campo" id="cfg-hora-abertura" value="${CONFIG.horaAbertura}" onchange="salvarHorarios()"></div>
+      <div style="flex:1;"><label class="rotulo">Fecha às</label><input type="time" class="campo" id="cfg-hora-fechamento" value="${CONFIG.horaFechamento}" onchange="salvarHorarios()"></div></div>` : ''}
     <div class="linha-config"><div class="txt"><b>Notificar cardápio publicado</b><span>Precisa do app aberto</span></div>
       <div class="switch ${CONFIG.notificacoesPublicacao?'on':''}" onclick="alternarNotificacoes()"><div class="bolinha"></div></div></div>
-    <div class="linha-config"><div class="txt"><b>Cadastro por foto (IA)</b><span>Preenche nome/descrição a partir da foto</span></div>
+    <div class="linha-config"><div class="txt"><b>Cadastro por foto (IA)</b><span>Preenche a partir da foto</span></div>
       <div class="switch ${CONFIG.iaAtivada?'on':''}" onclick="alternarConfig('iaAtivada')"><div class="bolinha"></div></div></div>
-    ${CONFIG.iaAtivada ? `
-      <label class="rotulo">Chave da API (Anthropic)</label>
+    ${CONFIG.iaAtivada ? `<label class="rotulo">Chave da API (Anthropic)</label>
       <input class="campo" id="cfg-ia-key" placeholder="sk-ant-..." value="${CONFIG.iaApiKey||''}" onchange="salvarChaveIA()">
       <p style="font-size:11.5px;color:var(--ink-soft);margin:-6px 0 10px;">Gerada em console.anthropic.com</p>
       <label class="rotulo">Campos extras que a IA preenche</label>
@@ -1327,29 +1302,25 @@ function renderizarConfig(){
       </div>` : ''}
     <div class="linha-config" style="margin-top:10px;"><div class="txt"><b>Foto do funcionário</b><span>Pede foto no primeiro acesso</span></div>
       <div class="switch ${CONFIG.fotoFuncionario?'on':''}" onclick="alternarConfig('fotoFuncionario')"><div class="bolinha"></div></div></div>
-
     <label class="rotulo" style="margin-top:22px;">Senha de acesso do gerente</label>
     <input class="campo" id="cfg-senha" type="text" value="${CONFIG.senhaGerente}" onchange="salvarSenha()">
-
     <label class="rotulo" style="margin-top:22px;">Empresas atendidas</label>
     <div id="lista-empresas">
       ${CONFIG.empresas.map((e,i)=>`
-        <div class="prato-card" style="align-items:center;">
-          <div class="prato-info"><p class="nome" style="font-size:14.5px;">${e.nome}</p></div>
-          <button class="mini-btn" onclick="removerEmpresa(${i})">🗑️</button>
-        </div>`).join('')}
+        <div class="prato-card" style="align-items:center;"><div class="prato-info"><p class="nome" style="font-size:14.5px;">${e.nome}</p></div>
+          <button class="mini-btn" onclick="removerEmpresa(${i})">🗑️</button></div>`).join('')}
     </div>
     <button class="btn btn-fantasma btn-bloco" onclick="adicionarEmpresa()">+ Adicionar empresa</button>
   `;
 }
-
 window.renomearCategoria = async (i, valor) => { CONFIG.categorias[i].nome = valor.trim() || CONFIG.categorias[i].nome; await salvarConfig(); };
+window.definirInstrucao = async (i, valor) => { CONFIG.categorias[i].instrucao = valor.trim(); await salvarConfig(); };
+window.definirMaxEscolhas = async (i, valor) => { CONFIG.categorias[i].maxEscolhas = Math.max(1, Math.min(6, parseInt(valor)||1)); await salvarConfig(); };
 window.alternarCategoriaCampo = async (i, campo, valor) => { CONFIG.categorias[i][campo] = valor; await salvarConfig(); renderizarCategoriasGerente(); };
 window.adicionarCategoria = async () => {
   const nome = prompt('Nome da nova categoria (ex: Massa, Bebida):');
   if(!nome) return;
-  const id = 'cat'+Date.now();
-  CONFIG.categorias.push({ id, nome, ativo:true, obrigatorio:false });
+  CONFIG.categorias.push({ id:'cat'+Date.now(), nome, ativo:true, obrigatorio:false, maxEscolhas:1, instrucao:'' });
   await salvarConfig(); renderizarConfig(); renderizarCategoriasGerente();
 };
 window.removerCategoria = async (i) => {
@@ -1376,23 +1347,17 @@ window.salvarHorarios = async () => {
   CONFIG.horaFechamento = document.getElementById('cfg-hora-fechamento').value;
   await salvarConfig(); toast('Horário salvo!');
 };
-window.salvarChaveIA = async () => {
-  CONFIG.iaApiKey = document.getElementById('cfg-ia-key').value.trim();
-  await salvarConfig(); toast('Chave salva!');
-};
+window.salvarChaveIA = async () => { CONFIG.iaApiKey = document.getElementById('cfg-ia-key').value.trim(); await salvarConfig(); toast('Chave salva!'); };
 window.alternarNotificacoes = async () => {
   if(!CONFIG.notificacoesPublicacao && 'Notification' in window){
     const permissao = await Notification.requestPermission();
     if(permissao !== 'granted'){ toast('Permissão de notificação negada'); return; }
   }
-  CONFIG.notificacoesPublicacao = !CONFIG.notificacoesPublicacao;
-  await salvarConfig(); renderizarConfig();
+  CONFIG.notificacoesPublicacao = !CONFIG.notificacoesPublicacao; await salvarConfig(); renderizarConfig();
 };
 window.adicionarEmpresa = async () => {
-  const nome = prompt('Nome da empresa:');
-  if(!nome) return;
-  CONFIG.empresas.push({ codigo: 'emp'+Date.now(), nome });
-  await salvarConfig(); renderizarConfig();
+  const nome = prompt('Nome da empresa:'); if(!nome) return;
+  CONFIG.empresas.push({ codigo: 'emp'+Date.now(), nome }); await salvarConfig(); renderizarConfig();
 };
 window.removerEmpresa = async (i) => { CONFIG.empresas.splice(i,1); await salvarConfig(); renderizarConfig(); };
 
@@ -1411,7 +1376,7 @@ function configurarInstalacaoPWA(){
 }
 window.instalarPWA = async () => {
   if(promptInstalacao){ promptInstalacao.prompt(); await promptInstalacao.userChoice; promptInstalacao = null; fecharBannerInstalar(); }
-  else { toast('No iPhone: toque em Compartilhar e depois em "Adicionar à Tela de Início"'); }
+  else toast('No iPhone: toque em Compartilhar e depois em "Adicionar à Tela de Início"');
 };
 window.fecharBannerInstalar = () => {
   document.getElementById('banner-instalar').classList.add('hide');
