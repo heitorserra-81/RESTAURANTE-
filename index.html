@@ -41,7 +41,8 @@
   .hide{display:none !important;}
 
   #tela-splash{position:fixed;inset:0;background:var(--pine);display:flex;flex-direction:column;
-    align-items:center;justify-content:center;color:#fff;z-index:999;transition:opacity .4s;padding:24px;text-align:center;}
+    align-items:center;justify-content:center;color:#fff;z-index:999;transition:opacity .4s;padding:24px;text-align:center;
+    padding-top:calc(24px + env(safe-area-inset-top));}
   #tela-splash h1{font-size:28px;font-weight:700;margin:16px 0 4px;}
   #tela-splash p{opacity:.8;font-size:14px;margin:0;}
   .logo-splash{width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--amber);
@@ -52,6 +53,7 @@
   .foto-topbar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--amber);flex-shrink:0;}
 
   .topbar{position:sticky;top:0;z-index:20;background:var(--bg);padding:16px 20px 12px;
+    padding-top:calc(16px + env(safe-area-inset-top));
     display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);gap:10px;}
   .topbar .esquerda{display:flex;align-items:center;gap:10px;min-width:0;}
   .topbar .titulo{font-size:19px;font-weight:700;font-family:'Playfair Display';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -59,7 +61,8 @@
   .icon-btn{width:38px;height:38px;border-radius:50%;background:var(--paper);border:1px solid var(--line);
     display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;color:var(--ink);}
 
-  .tela-centro{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:28px;gap:14px;}
+  .tela-centro{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:28px;gap:14px;
+    padding-top:calc(28px + env(safe-area-inset-top));padding-bottom:calc(28px + env(safe-area-inset-bottom));}
   .marca{text-align:center;margin-bottom:24px;}
   .marca h1{font-size:26px;margin:0 0 6px;color:var(--amber);}
   .marca p{color:var(--ink-soft);font-size:14px;margin:0;}
@@ -139,7 +142,24 @@
   .opcao-card .texto .desc{font-size:13px;color:var(--ink-soft);line-height:1.5;margin:0;}
   .opcao-card .texto .coringa-nota{font-size:11px;color:var(--amber);margin-top:6px;}
 
+  .grade-opcoes{display:grid;gap:12px;}
+  .grade-opcoes.col-1{grid-template-columns:1fr;}
+  .grade-opcoes.col-2{grid-template-columns:1fr 1fr;}
+  .grade-opcoes.col-3{grid-template-columns:1fr 1fr 1fr;}
+  .grade-opcoes.col-2 .opcao-card .foto-grande,
+  .grade-opcoes.col-3 .opcao-card .foto-grande{height:96px;font-size:28px;}
+  .grade-opcoes.col-2 .opcao-card .texto,
+  .grade-opcoes.col-3 .opcao-card .texto{padding:9px 10px 11px;}
+  .grade-opcoes.col-2 .opcao-card .texto .nome,
+  .grade-opcoes.col-3 .opcao-card .texto .nome{font-size:13.5px;margin:0 0 2px;}
+  .grade-opcoes.col-2 .opcao-card .texto .desc,
+  .grade-opcoes.col-3 .opcao-card .texto .desc{font-size:11px;line-height:1.35;}
+  .grade-opcoes.col-3 .opcao-card .texto .desc{display:none;}
+  .grade-opcoes.col-2 .opcao-card .check-selo,
+  .grade-opcoes.col-3 .opcao-card .check-selo{width:24px;height:24px;font-size:13px;top:6px;right:6px;}
+
   .confirmacao-box{background:var(--pine);color:#fff;border-radius:var(--radius);padding:24px;text-align:center;}
+
   .confirmacao-box .selo{font-size:44px;margin-bottom:8px;}
   .confirmacao-box h2{margin:0 0 6px;font-size:20px;}
   .confirmacao-box p{opacity:.85;font-size:13.5px;margin:0;}
@@ -369,6 +389,16 @@ function arquivoParaBase64(file){
     leitor.readAsDataURL(file);
   });
 }
+function nomeArquivoSeguro(nomeOriginal){
+  const partes = nomeOriginal.split('.');
+  const extensao = partes.length > 1 ? partes.pop() : 'jpg';
+  const base = partes.join('.')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')  // remove acentos
+    .replace(/[^a-zA-Z0-9]+/g,'-')                      // troca espaços/símbolos por hífen
+    .replace(/^-+|-+$/g,'')                             // tira hífen nas pontas
+    .toLowerCase();
+  return `${base || 'foto'}.${extensao.toLowerCase()}`;
+}
 
 /* ============================================================
    ESTADO GLOBAL
@@ -390,13 +420,13 @@ const CONFIG_PADRAO = {
   fotoFuncionario: false,
   iaCampos: { vegetariano:false, alergenos:false, porcaoSugerida:false },
   categorias: [
-    { id:'proteina',   nome:'Proteína',     ativo:true,  obrigatorio:true,  maxEscolhas:1, instrucao:'' },
-    { id:'guarnicao1', nome:'Guarnição 1',  ativo:true,  obrigatorio:true,  maxEscolhas:1, instrucao:'' },
-    { id:'guarnicao2', nome:'Guarnição 2',  ativo:true,  obrigatorio:false, maxEscolhas:1, instrucao:'' },
-    { id:'guarnicao3', nome:'Guarnição 3',  ativo:false, obrigatorio:false, maxEscolhas:1, instrucao:'' },
-    { id:'guarnicao4', nome:'Guarnição 4',  ativo:false, obrigatorio:false, maxEscolhas:1, instrucao:'' },
-    { id:'salada',     nome:'Salada',       ativo:true,  obrigatorio:false, maxEscolhas:1, instrucao:'' },
-    { id:'sobremesa',  nome:'Sobremesa',    ativo:false, obrigatorio:false, maxEscolhas:1, instrucao:'' }
+    { id:'proteina',   nome:'Proteína',     ativo:true,  obrigatorio:true,  maxEscolhas:1, instrucao:'', colunas:1 },
+    { id:'guarnicao1', nome:'Guarnição 1',  ativo:true,  obrigatorio:true,  maxEscolhas:1, instrucao:'', colunas:1 },
+    { id:'guarnicao2', nome:'Guarnição 2',  ativo:true,  obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1 },
+    { id:'guarnicao3', nome:'Guarnição 3',  ativo:false, obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1 },
+    { id:'guarnicao4', nome:'Guarnição 4',  ativo:false, obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1 },
+    { id:'salada',     nome:'Salada',       ativo:true,  obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1 },
+    { id:'sobremesa',  nome:'Sobremesa',    ativo:false, obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1 }
   ],
   coringas: {},
   empresas: [ { codigo: "emp1", nome: "Empresa Exemplo Ltda" } ]
@@ -444,7 +474,7 @@ async function carregarConfig(){
     CONFIG = {
       ...CONFIG_PADRAO, ...salvo,
       iaCampos: { ...CONFIG_PADRAO.iaCampos, ...(salvo.iaCampos||{}) },
-      categorias: salvo.categorias && salvo.categorias.length ? salvo.categorias.map(c=>({ maxEscolhas:1, instrucao:'', ...c })) : CONFIG_PADRAO.categorias,
+      categorias: salvo.categorias && salvo.categorias.length ? salvo.categorias.map(c=>({ maxEscolhas:1, instrucao:'', colunas:1, ...c })) : CONFIG_PADRAO.categorias,
       coringas: salvo.coringas || {}
     };
   } else {
@@ -505,18 +535,38 @@ window.validarSenhaGerente = () => {
   else toast('Código incorreto');
 };
 window.sairGerente = () => mostrarTela('tela-perfil');
-window.irParaFuncionario = () => {
+window.irParaFuncionario = async () => {
   const salvo = localStorage.getItem('refeitorio_funcionario');
   if(salvo){ FUNCIONARIO = JSON.parse(salvo); mostrarTela('tela-funcionario'); renderizarSaudacao(); }
-  else { montarCamposIdentificacao(); mostrarTela('tela-identificacao'); }
+  else {
+    await carregarCacheFuncionarios();
+    montarCamposIdentificacao();
+    mostrarTela('tela-identificacao');
+  }
 };
 
 /* ============================================================
    IDENTIFICAÇÃO DO FUNCIONÁRIO
    ============================================================ */
+let FUNCIONARIOS_CACHE = [];
+let FUNCIONARIO_RECONHECIDO_ID = null;
+async function carregarCacheFuncionarios(){
+  try{
+    const snap = await getDocs(collection(db, PREFIXO+"funcionarios"));
+    FUNCIONARIOS_CACHE = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+  }catch(e){ FUNCIONARIOS_CACHE = []; }
+}
+
 function montarCamposIdentificacao(){
   const box = document.getElementById('campos-identificacao');
-  let html = `<label class="rotulo">Seu nome</label><input class="campo" id="id-nome" placeholder="Nome completo">`;
+  let html = `<label class="rotulo">Seu nome</label>
+    <input class="campo" id="id-nome" placeholder="Nome completo" autocomplete="off" oninput="buscarFuncionarioPorNome(this.value)">
+    <div id="sugestoes-funcionario"></div>
+    <div id="foto-reconhecida" class="hide" style="display:flex;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--amber);border-radius:12px;padding:10px 12px;margin:-2px 0 10px;">
+      <img id="foto-reconhecida-img" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">
+      <div style="flex:1;font-size:12.5px;color:var(--ink-soft);">É você? <b style="color:var(--ink);" id="foto-reconhecida-nome"></b></div>
+      <button type="button" class="mini-btn" onclick="limparReconhecimento()">✕</button>
+    </div>`;
   if(CONFIG.identificacao === "nome_empresa"){
     html += `<label class="rotulo">Sua empresa</label><select class="campo" id="id-empresa">${CONFIG.empresas.map(e=>`<option value="${e.codigo}">${e.nome}</option>`).join('')}</select>`;
   } else if(CONFIG.identificacao === "matricula"){
@@ -525,9 +575,49 @@ function montarCamposIdentificacao(){
   } else if(CONFIG.identificacao === "telefone"){
     html += `<label class="rotulo">WhatsApp</label><input class="campo" id="id-telefone" inputmode="numeric" placeholder="(19) 90000-0000">`;
   }
-  if(CONFIG.fotoFuncionario){ html += `<label class="rotulo">Sua foto</label><input type="file" accept="image/*" class="campo" id="id-foto">`; }
+  if(CONFIG.fotoFuncionario){ html += `<label class="rotulo">Sua foto</label><input type="file" accept="image/*" class="campo" id="id-foto"><p style="font-size:11.5px;color:var(--ink-soft);margin:-6px 0 10px;">Se você já se reconheceu acima, pode deixar em branco — usamos a foto que já temos.</p>`; }
   box.innerHTML = html;
 }
+
+window.buscarFuncionarioPorNome = (termo) => {
+  const caixa = document.getElementById('sugestoes-funcionario');
+  FUNCIONARIO_RECONHECIDO_ID = null;
+  document.getElementById('foto-reconhecida')?.classList.add('hide');
+  const termoLimpo = termo.trim().toLowerCase();
+  if(termoLimpo.length < 2){ caixa.innerHTML = ''; return; }
+  const encontrados = FUNCIONARIOS_CACHE.filter(f => (f.nome||'').toLowerCase().includes(termoLimpo)).slice(0,4);
+  if(encontrados.length===0){ caixa.innerHTML = ''; return; }
+  caixa.innerHTML = `<div style="display:flex;flex-direction:column;gap:6px;margin:-2px 0 10px;">
+    ${encontrados.map(f => `
+      <button type="button" onclick='selecionarFuncionarioReconhecido(${JSON.stringify(f).replace(/'/g,"&#39;")})' style="display:flex;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:8px 10px;text-align:left;">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--bg);background-image:${f.foto?`url('${f.foto}')`:'none'};background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">${f.foto?'':'🧑‍🏭'}</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:700;color:var(--ink);">${f.nome}</div>
+        <div style="font-size:11px;color:var(--ink-soft);">${f.empresaNome||''}</div></div>
+      </button>`).join('')}
+  </div>`;
+};
+
+window.selecionarFuncionarioReconhecido = (f) => {
+  FUNCIONARIO_RECONHECIDO_ID = f.id;
+  document.getElementById('id-nome').value = f.nome;
+  document.getElementById('sugestoes-funcionario').innerHTML = '';
+  if(f.foto){
+    document.getElementById('foto-reconhecida-img').src = f.foto;
+    document.getElementById('foto-reconhecida-nome').textContent = f.nome.split(' ')[0];
+    document.getElementById('foto-reconhecida').classList.remove('hide');
+  }
+  const selEmpresa = document.getElementById('id-empresa');
+  if(selEmpresa && f.empresaCodigo) selEmpresa.value = f.empresaCodigo;
+  const campoMatricula = document.getElementById('id-matricula');
+  if(campoMatricula && f.matricula) campoMatricula.value = f.matricula;
+  const campoTelefone = document.getElementById('id-telefone');
+  if(campoTelefone && f.telefone) campoTelefone.value = f.telefone;
+};
+window.limparReconhecimento = () => {
+  FUNCIONARIO_RECONHECIDO_ID = null;
+  document.getElementById('foto-reconhecida').classList.add('hide');
+};
+
 window.salvarIdentificacao = async () => {
   const nome = document.getElementById('id-nome').value.trim();
   if(!nome){ toast('Digite seu nome'); return; }
@@ -538,13 +628,23 @@ window.salvarIdentificacao = async () => {
   }
   if(CONFIG.identificacao === "matricula") dados.matricula = document.getElementById('id-matricula').value.trim();
   if(CONFIG.identificacao === "telefone") dados.telefone = document.getElementById('id-telefone').value.trim();
+
+  // se reconheceu um perfil existente e não trocou a foto, mantém a foto antiga
+  const perfilReconhecido = FUNCIONARIO_RECONHECIDO_ID ? FUNCIONARIOS_CACHE.find(f=>f.id===FUNCIONARIO_RECONHECIDO_ID) : null;
+  if(perfilReconhecido?.foto) dados.foto = perfilReconhecido.foto;
+
   if(CONFIG.fotoFuncionario){
     const fotoInput = document.getElementById('id-foto');
     if(fotoInput?.files[0]){
-      try{ toast('Enviando foto…'); const caminho = `funcionarios/${Date.now()}_${fotoInput.files[0].name}`; dados.foto = await uploadFotoSupabase(fotoInput.files[0], caminho); }
+      try{ toast('Enviando foto…'); const caminho = `funcionarios/${Date.now()}_${nomeArquivoSeguro(fotoInput.files[0].name)}`; dados.foto = await uploadFotoSupabase(fotoInput.files[0], caminho); }
       catch(e){ toast('Erro ao enviar a foto — continuando sem foto'); }
     }
   }
+
+  if(FUNCIONARIO_RECONHECIDO_ID){
+    localStorage.setItem('refeitorio_funcionario_id', FUNCIONARIO_RECONHECIDO_ID);
+  }
+
   FUNCIONARIO = dados;
   localStorage.setItem('refeitorio_funcionario', JSON.stringify(dados));
   await salvarFuncionarioNaEquipe(dados);
@@ -677,41 +777,67 @@ function ativarArrastoGerente(){
     const secao = card.closest('.secao-categoria');
     const lista = secao.querySelector(`[data-lista="${ehCoringa?'coringa':'dia'}"]`);
     const cards = Array.from(lista.querySelectorAll('.prato-card'));
-    ARRASTO = { catId, ehCoringa, indiceOrigem, card, cards, startY: e.clientY };
+    const rect = card.getBoundingClientRect();
+    const step = rect.height + 10; // altura do card + margem
+    const outrosCards = cards.map((c,idx)=>({
+      el:c, idx, centroOriginal: c.getBoundingClientRect().top + c.getBoundingClientRect().height/2
+    })).filter(c=>c.el!==card);
+
+    ARRASTO = { catId, ehCoringa, indiceOrigem, card, cards, outrosCards, step, startY: e.clientY, hoverIndex: indiceOrigem };
     card.classList.add('arrastando');
+    card.style.transition = 'none';
+    outrosCards.forEach(c=>{ c.el.style.transition = 'transform .22s cubic-bezier(.2,.8,.2,1)'; });
     card.setPointerCapture(e.pointerId);
     document.addEventListener('pointermove', moverArrasto);
     document.addEventListener('pointerup', soltarArrasto);
   });
 }
+
 function moverArrasto(e){
   if(!ARRASTO) return;
   const delta = e.clientY - ARRASTO.startY;
-  ARRASTO.card.style.transform = `translateY(${delta}px)`;
+  const inclinacao = Math.max(-6, Math.min(6, delta/18));
+  ARRASTO.card.style.transform = `translateY(${delta}px) scale(1.045) rotate(${inclinacao}deg)`;
+
+  // recalcula quantos "outros" cards ficaram acima do ponteiro -> essa é a nova posição
+  let novoIndice = 0;
+  ARRASTO.outrosCards.forEach(c=>{ if(c.centroOriginal < e.clientY) novoIndice++; });
+
+  if(novoIndice !== ARRASTO.hoverIndex){
+    ARRASTO.hoverIndex = novoIndice;
+    ARRASTO.outrosCards.forEach(c=>{
+      let desloca = 0;
+      if(c.idx > ARRASTO.indiceOrigem && c.idx <= novoIndice) desloca = -ARRASTO.step;
+      else if(c.idx < ARRASTO.indiceOrigem && c.idx >= novoIndice) desloca = ARRASTO.step;
+      c.el.style.transform = desloca ? `translateY(${desloca}px)` : '';
+    });
+  }
 }
+
 async function soltarArrasto(e){
   if(!ARRASTO) return;
-  const { catId, ehCoringa, indiceOrigem, card, cards } = ARRASTO;
-  const finalRect = card.getBoundingClientRect();
-  const centroFinal = finalRect.top + finalRect.height/2;
+  const { catId, ehCoringa, indiceOrigem, card, outrosCards, hoverIndex } = ARRASTO;
   card.classList.remove('arrastando');
-  card.style.transform = '';
+  card.style.transition = 'transform .22s cubic-bezier(.2,.8,.2,1)';
   document.removeEventListener('pointermove', moverArrasto);
   document.removeEventListener('pointerup', soltarArrasto);
 
-  let novoIndice = 0;
-  cards.filter(c=>c!==card).forEach(c=>{
-    const r = c.getBoundingClientRect();
-    if(r.top + r.height/2 < centroFinal) novoIndice++;
-  });
+  const novoIndice = hoverIndex;
+  // anima o card solto até o slot final antes de re-renderizar
+  const deslocaFinal = (novoIndice - indiceOrigem) * ARRASTO.step;
+  card.style.transform = `translateY(${deslocaFinal}px) scale(1)`;
 
   const lista = ehCoringa ? CONFIG.coringas[catId] : CARDAPIO_CATEGORIAS[catId];
-  if(lista && novoIndice !== indiceOrigem){
+  const mudou = lista && novoIndice !== indiceOrigem;
+  if(mudou){
     const [item] = lista.splice(indiceOrigem,1);
     lista.splice(novoIndice,0,item);
-    if(ehCoringa) await salvarConfig(); else await salvarCardapioHoje();
   }
-  renderizarCategoriasGerente();
+
+  setTimeout(async ()=>{
+    if(mudou){ if(ehCoringa) await salvarConfig(); else await salvarCardapioHoje(); }
+    renderizarCategoriasGerente();
+  }, mudou ? 180 : 0);
   ARRASTO = null;
 }
 
@@ -762,7 +888,7 @@ window.confirmarOpcao = async (indiceEdicao, ehCoringa) => {
 
   let fotoUrl = editando ? ((ehCoringa ? CONFIG.coringas[catId][indiceEdicao] : CARDAPIO_CATEGORIAS[catId][indiceEdicao]).foto || "") : "";
   if(fotoInput.files[0]){
-    try{ toast('Enviando foto…'); const caminho = `${hojeISO()}/${Date.now()}_${fotoInput.files[0].name}`; fotoUrl = await uploadFotoSupabase(fotoInput.files[0], caminho); }
+    try{ toast('Enviando foto…'); const caminho = `${hojeISO()}/${Date.now()}_${nomeArquivoSeguro(fotoInput.files[0].name)}`; fotoUrl = await uploadFotoSupabase(fotoInput.files[0], caminho); }
     catch(e){ toast('Erro ao enviar a foto — salvo sem foto'); }
   }
 
@@ -988,6 +1114,7 @@ function renderizarAreaFuncionario(){
         <div class="rotulo-cat">${cat.nome}${cat.obrigatorio ? '' : ' · opcional'}</div>
         <h3>${cat.instrucao || tituloEscolha}</h3>
       </div>
+      <div class="grade-opcoes col-${cat.colunas||1}">
       ${itens.map(p => {
         const selecionado = (SELECOES[cat.id]||[]).includes(p.nome);
         return `
@@ -1000,6 +1127,7 @@ function renderizarAreaFuncionario(){
           </div>
         </div>`;
       }).join('')}
+      </div>
     </div>`;
   }).join('');
 
@@ -1260,6 +1388,12 @@ function renderizarConfig(){
             <input type="number" min="1" max="6" value="${cat.maxEscolhas||1}" onchange="definirMaxEscolhas(${i}, this.value)">
             <span>opções</span>
           </div>
+          <div class="qtd-escolhas">
+            <span>Cards lado a lado</span>
+            <div class="chip-select" style="margin:0;">
+              ${[1,2,3].map(n=>`<button type="button" class="chip ${(cat.colunas||1)===n?'ativo':''}" onclick="definirColunas(${i}, ${n})">${n}</button>`).join('')}
+            </div>
+          </div>
         </div>`).join('')}
     </div>
     <button class="btn btn-fantasma btn-bloco" onclick="adicionarCategoria()">+ Adicionar categoria</button>
@@ -1316,11 +1450,12 @@ function renderizarConfig(){
 window.renomearCategoria = async (i, valor) => { CONFIG.categorias[i].nome = valor.trim() || CONFIG.categorias[i].nome; await salvarConfig(); };
 window.definirInstrucao = async (i, valor) => { CONFIG.categorias[i].instrucao = valor.trim(); await salvarConfig(); };
 window.definirMaxEscolhas = async (i, valor) => { CONFIG.categorias[i].maxEscolhas = Math.max(1, Math.min(6, parseInt(valor)||1)); await salvarConfig(); };
+window.definirColunas = async (i, n) => { CONFIG.categorias[i].colunas = n; await salvarConfig(); renderizarConfig(); };
 window.alternarCategoriaCampo = async (i, campo, valor) => { CONFIG.categorias[i][campo] = valor; await salvarConfig(); renderizarCategoriasGerente(); };
 window.adicionarCategoria = async () => {
   const nome = prompt('Nome da nova categoria (ex: Massa, Bebida):');
   if(!nome) return;
-  CONFIG.categorias.push({ id:'cat'+Date.now(), nome, ativo:true, obrigatorio:false, maxEscolhas:1, instrucao:'' });
+  CONFIG.categorias.push({ id:'cat'+Date.now(), nome, ativo:true, obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1 });
   await salvarConfig(); renderizarConfig(); renderizarCategoriasGerente();
 };
 window.removerCategoria = async (i) => {
