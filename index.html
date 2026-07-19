@@ -393,7 +393,11 @@ async function uploadFotoSupabase(file, caminho){
     headers: { "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "apikey": SUPABASE_ANON_KEY, "Content-Type": file.type, "x-upsert": "true" },
     body: file
   });
-  if(!resp.ok) throw new Error("Falha no upload da foto");
+  if(!resp.ok){
+    let detalhe = '';
+    try{ detalhe = (await resp.json()).message || await resp.text(); }catch(e){ detalhe = resp.statusText; }
+    throw new Error(`${resp.status}: ${detalhe}`);
+  }
   return `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${caminho}`;
 }
 function arquivoParaBase64(file){
@@ -691,8 +695,14 @@ window.salvarIdentificacao = async () => {
   if(CONFIG.fotoFuncionario){
     const fotoInput = document.getElementById('id-foto');
     if(fotoInput?.files[0]){
-      try{ toast('Enviando foto…'); const caminho = `funcionarios/${Date.now()}_${nomeArquivoSeguro(fotoInput.files[0].name)}`; dados.foto = await uploadFotoSupabase(fotoInput.files[0], caminho); }
-      catch(e){ toast('Erro ao enviar a foto — continuando sem foto'); }
+      try{
+        toast('Enviando foto…');
+        const caminho = `funcionarios/${Date.now()}_${nomeArquivoSeguro(fotoInput.files[0].name)}`;
+        dados.foto = await uploadFotoSupabase(fotoInput.files[0], caminho);
+      }catch(e){
+        console.error('Erro no upload da foto do funcionário:', e);
+        alert('Não consegui enviar sua foto:\n\n' + e.message + '\n\nSeu cadastro vai continuar sem foto — pode tentar de novo depois.');
+      }
     }
   }
 
@@ -943,7 +953,10 @@ window.abrirModalOpcao = (catId, indiceEdicao, ehCoringa) => {
       <div class="modal">
         <div class="modal-titulo"><h3>${editando ? 'Editar' : 'Nova opção'} — ${cat.nome}</h3><button class="icon-btn" onclick="fecharModal()">✕</button></div>
         <label class="rotulo">Foto</label>
-        <input type="file" accept="image/*" class="campo" id="np-foto">
+        <input type="file" accept="image/*" class="campo" id="np-foto" onchange="previsualizarFoto(this)">
+        <div id="np-preview-container" style="margin:-4px 0 10px;">
+          ${p?.foto ? `<img src="${p.foto}" style="width:64px;height:64px;border-radius:10px;object-fit:cover;" onerror="this.outerHTML='<p style=&quot;font-size:11.5px;color:var(--tomato);&quot;>⚠️ A foto salva não está carregando.</p>'">` : ''}
+        </div>
         ${CONFIG.iaAtivada && !ehCoringa ? `<button type="button" class="btn btn-fantasma btn-bloco" style="margin-bottom:10px;" onclick="preencherComIA()">🪄 Preencher com IA a partir da foto</button>
         <p id="ia-status" style="font-size:12px;color:var(--ink-soft);margin:-4px 0 10px;"></p>` : ''}
         <label class="rotulo">Nome</label>
@@ -965,6 +978,13 @@ window.abrirModalOpcao = (catId, indiceEdicao, ehCoringa) => {
     </div>`;
 };
 window.fecharModal = () => { document.getElementById('raiz-modal').innerHTML = ''; };
+window.previsualizarFoto = (input) => {
+  const container = document.getElementById('np-preview-container');
+  if(!input.files[0]){ return; }
+  const urlLocal = URL.createObjectURL(input.files[0]);
+  container.innerHTML = `<img src="${urlLocal}" style="width:64px;height:64px;border-radius:10px;object-fit:cover;">
+    <p style="font-size:11px;color:var(--ink-soft);margin:4px 0 0;">Prévia local — só confirma que o arquivo foi lido certo. Ainda precisa salvar pra enviar.</p>`;
+};
 
 window.confirmarOpcao = async (indiceEdicao, ehCoringa) => {
   const nome = document.getElementById('np-nome').value.trim();
@@ -978,8 +998,15 @@ window.confirmarOpcao = async (indiceEdicao, ehCoringa) => {
 
   let fotoUrl = editando ? ((ehCoringa ? CONFIG.coringas[catId][indiceEdicao] : CARDAPIO_CATEGORIAS[catId][indiceEdicao]).foto || "") : "";
   if(fotoInput.files[0]){
-    try{ toast('Enviando foto…'); const caminho = `${hojeISO()}/${Date.now()}_${nomeArquivoSeguro(fotoInput.files[0].name)}`; fotoUrl = await uploadFotoSupabase(fotoInput.files[0], caminho); }
-    catch(e){ toast('Erro ao enviar a foto — salvo sem foto'); }
+    try{
+      toast('Enviando foto…');
+      const caminho = `${hojeISO()}/${Date.now()}_${nomeArquivoSeguro(fotoInput.files[0].name)}`;
+      fotoUrl = await uploadFotoSupabase(fotoInput.files[0], caminho);
+      console.log('Foto enviada com sucesso:', fotoUrl);
+    }catch(e){
+      console.error('Erro no upload da foto:', e);
+      alert('Não consegui enviar a foto:\n\n' + e.message + '\n\nO item vai ser salvo sem foto — você pode editar depois e tentar de novo.');
+    }
   }
 
   const dadosOpcao = {
