@@ -110,8 +110,9 @@
   .prato-card.arrastando{box-shadow:0 16px 34px rgba(0,0,0,.55);opacity:.95;z-index:30;background:var(--pine-dark);}
   .handle-arrastar{font-size:20px;color:var(--ink-soft);padding:4px 2px;touch-action:none;cursor:grab;flex-shrink:0;}
   .prato-foto{width:56px;height:56px;border-radius:12px;background:var(--bg);flex-shrink:0;
-    background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;
+    display:flex;align-items:center;justify-content:center;position:relative;
     font-size:22px;color:var(--ink-soft);overflow:hidden;}
+  .prato-foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
   .prato-info{flex:1;min-width:0;}
   .prato-info .nome{font-family:'Playfair Display';font-weight:700;font-size:15px;margin:0 0 2px;color:var(--ink);}
   .prato-info .desc{font-size:12px;color:var(--ink-soft);margin:0 0 6px;line-height:1.4;}
@@ -131,8 +132,9 @@
   .opcao-card:active{transform:scale(.985);}
   .opcao-card.selecionada{box-shadow:0 0 0 2px var(--amber), 0 0 28px rgba(201,168,76,.6);}
   .opcao-card.esgotada{opacity:.4;pointer-events:none;}
-  .opcao-card .foto-grande{width:100%;height:140px;background:var(--bg);background-size:cover;background-position:center;
-    display:flex;align-items:center;justify-content:center;font-size:38px;color:var(--ink-soft);position:relative;}
+  .opcao-card .foto-grande{width:100%;height:140px;background:var(--bg);
+    display:flex;align-items:center;justify-content:center;font-size:38px;color:var(--ink-soft);position:relative;overflow:hidden;}
+  .opcao-card .foto-grande img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
   .opcao-card .check-selo{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;
     background:var(--amber);color:#1A0A0A;display:none;align-items:center;justify-content:center;font-size:16px;font-weight:900;
     box-shadow:0 2px 8px rgba(0,0,0,.4);}
@@ -165,6 +167,18 @@
   .confirmacao-box p{opacity:.85;font-size:13.5px;margin:0;}
   .resumo-prato{background:rgba(255,255,255,.08);border-radius:12px;padding:12px 14px;margin-top:14px;text-align:left;}
   .resumo-prato div{font-size:13px;padding:3px 0;opacity:.9;}
+
+  .comanda-card{background:var(--paper);border:1px dashed var(--amber);border-radius:16px;padding:16px;margin-top:16px;}
+  .comanda-topo{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-soft);
+    text-transform:uppercase;letter-spacing:.04em;font-weight:700;border-bottom:1px dashed var(--line);padding-bottom:10px;margin-bottom:12px;}
+  .comanda-linha{margin-bottom:12px;}
+  .comanda-cat{font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:.04em;font-weight:700;display:block;margin-bottom:6px;}
+  .comanda-itens{display:flex;flex-direction:column;gap:6px;}
+  .comanda-item{display:flex;align-items:center;gap:10px;}
+  .comanda-foto{width:32px;height:32px;border-radius:8px;background:var(--bg);flex-shrink:0;position:relative;
+    display:flex;align-items:center;justify-content:center;font-size:14px;overflow:hidden;}
+  .comanda-foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .comanda-item span{font-size:13.5px;color:var(--ink);}
 
   .linha-config{display:flex;align-items:center;justify-content:space-between;padding:14px 0;
     border-bottom:1px solid var(--line);gap:12px;}
@@ -318,6 +332,7 @@
     </div>
 
     <div class="conteudo" id="painel-cardapio">
+      <div id="chips-turno-cardapio" style="margin-bottom:14px;"></div>
       <button class="btn btn-fantasma btn-bloco" style="margin-bottom:10px;" onclick="copiarCardapioOntem()">↺ Copiar cardápio de ontem</button>
       <button class="btn btn-amber btn-bloco" style="margin-bottom:14px;" onclick="abrirModalCardapioIA()">🪄 Cardápio completo por IA</button>
       <p style="font-size:11.5px;color:var(--ink-soft);margin:-6px 0 14px;">Segure o ⠿ pra reordenar os itens dentro de cada categoria.</p>
@@ -411,22 +426,25 @@ const CONFIG_PADRAO = {
   campoSugestoes: true,
   senhaGerente: "refeitorio2026",
   controlePorcoes: false,
-  janelaPedidos: false,
-  horaAbertura: "07:00",
-  horaFechamento: "10:30",
+  turnos: [
+    { id:'almoco', nome:'Almoço',  ativo:true,  horaAbertura:'07:00', horaFechamento:'10:30' },
+    { id:'jantar', nome:'Jantar',  ativo:false, horaAbertura:'16:00', horaFechamento:'19:00' },
+    { id:'ceia',   nome:'Ceia',    ativo:false, horaAbertura:'21:00', horaFechamento:'23:30' }
+  ],
+  planejamentoProducao: false,
   notificacoesPublicacao: false,
   iaAtivada: false,
   iaApiKey: "",
   fotoFuncionario: false,
   iaCampos: { vegetariano:false, alergenos:false, porcaoSugerida:false },
   categorias: [
-    { id:'proteina',   nome:'Proteína',     ativo:true,  obrigatorio:true,  maxEscolhas:1, instrucao:'', colunas:1 },
-    { id:'guarnicao1', nome:'Guarnição 1',  ativo:true,  obrigatorio:true,  maxEscolhas:1, instrucao:'', colunas:1 },
-    { id:'guarnicao2', nome:'Guarnição 2',  ativo:true,  obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1 },
-    { id:'guarnicao3', nome:'Guarnição 3',  ativo:false, obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1 },
-    { id:'guarnicao4', nome:'Guarnição 4',  ativo:false, obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1 },
-    { id:'salada',     nome:'Salada',       ativo:true,  obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1 },
-    { id:'sobremesa',  nome:'Sobremesa',    ativo:false, obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1 }
+    { id:'proteina',   nome:'Proteína',     ativo:true,  obrigatorio:true,  maxEscolhas:1, instrucao:'', colunas:1, unidadeMedida:'kg',     percapita:0.2 },
+    { id:'guarnicao1', nome:'Guarnição 1',  ativo:true,  obrigatorio:true,  maxEscolhas:1, instrucao:'', colunas:1, unidadeMedida:'kg',     percapita:0.15 },
+    { id:'guarnicao2', nome:'Guarnição 2',  ativo:true,  obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1, unidadeMedida:'kg',     percapita:0.1 },
+    { id:'guarnicao3', nome:'Guarnição 3',  ativo:false, obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1, unidadeMedida:'kg',     percapita:0.1 },
+    { id:'guarnicao4', nome:'Guarnição 4',  ativo:false, obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1, unidadeMedida:'kg',     percapita:0.1 },
+    { id:'salada',     nome:'Salada',       ativo:true,  obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1, unidadeMedida:'kg',     percapita:0.08 },
+    { id:'sobremesa',  nome:'Sobremesa',    ativo:false, obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1, unidadeMedida:'porcao', percapita:1 }
   ],
   coringas: {},
   empresas: [ { codigo: "emp1", nome: "Empresa Exemplo Ltda" } ]
@@ -441,15 +459,28 @@ let SELECOES = {};               // { catId: [nomesEscolhidos] }
 let TAB_GERENTE_ATIVA = "cardapio";
 let CATEGORIA_MODAL_ATUAL = null;
 let SUGESTOES_MAX_PENDENTES = null; // usado no fluxo de revisão da IA
+let TURNO_CONTEXTO = null;       // turno cujo cardápio está carregado em CARDAPIO_CATEGORIAS agora
+let TURNO_GERENTE_ATIVO = null;  // turno que o gerente está editando
+let UNSUB_CARDAPIO = null;       // função pra cancelar o listener anterior
 
 function hojeISO(){ return new Date().toISOString().slice(0,10); }
 function dataFormatada(){ return new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long' }); }
-function dentroDaJanela(){
+function dentroDaJanelaTurno(turno){
   const agora = new Date();
-  const [hA,mA] = (CONFIG.horaAbertura||'00:00').split(':').map(Number);
-  const [hF,mF] = (CONFIG.horaFechamento||'23:59').split(':').map(Number);
+  const [hA,mA] = (turno.horaAbertura||'00:00').split(':').map(Number);
+  const [hF,mF] = (turno.horaFechamento||'23:59').split(':').map(Number);
   const minAgora = agora.getHours()*60 + agora.getMinutes();
   return minAgora >= (hA*60+mA) && minAgora <= (hF*60+mF);
+}
+function turnosAtivos(){ return CONFIG.turnos.filter(t=>t.ativo); }
+function turnoAtual(){
+  const ativos = turnosAtivos();
+  return ativos.find(t => dentroDaJanelaTurno(t)) || null;
+}
+function proximoTurnoTexto(){
+  const ativos = turnosAtivos();
+  if(ativos.length===0) return 'Nenhuma refeição configurada.';
+  return ativos.map(t=>`${t.nome} ${t.horaAbertura}–${t.horaFechamento}`).join(' · ');
 }
 function mostrarTela(id){
   document.querySelectorAll('#app > .tela-centro, #app > div[id^="tela-"]').forEach(el=>el.classList.add('hide'));
@@ -474,8 +505,9 @@ async function carregarConfig(){
     CONFIG = {
       ...CONFIG_PADRAO, ...salvo,
       iaCampos: { ...CONFIG_PADRAO.iaCampos, ...(salvo.iaCampos||{}) },
-      categorias: salvo.categorias && salvo.categorias.length ? salvo.categorias.map(c=>({ maxEscolhas:1, instrucao:'', colunas:1, ...c })) : CONFIG_PADRAO.categorias,
-      coringas: salvo.coringas || {}
+      categorias: salvo.categorias && salvo.categorias.length ? salvo.categorias.map(c=>({ maxEscolhas:1, instrucao:'', colunas:1, unidadeMedida:'porcao', percapita:1, ...c })) : CONFIG_PADRAO.categorias,
+      coringas: salvo.coringas || {},
+      turnos: salvo.turnos && salvo.turnos.length ? salvo.turnos : CONFIG_PADRAO.turnos
     };
   } else {
     CONFIG = { ...CONFIG_PADRAO };
@@ -494,7 +526,6 @@ async function iniciar(){
   }, 8000);
   try{
     await carregarConfig();
-    escutarCardapioHoje();
     escutarPedidosHoje();
     document.getElementById('data-hoje-func').textContent = dataFormatada();
     document.getElementById('data-hoje-gerente').textContent = dataFormatada();
@@ -504,12 +535,17 @@ async function iniciar(){
       document.getElementById('tela-splash').classList.add('hide');
       document.getElementById('app').classList.remove('hide');
       const salvo = localStorage.getItem('refeitorio_funcionario');
-      if(salvo){ FUNCIONARIO = JSON.parse(salvo); mostrarTela('tela-funcionario'); renderizarSaudacao(); }
-      else mostrarTela('tela-perfil');
+      if(salvo){
+        FUNCIONARIO = JSON.parse(salvo);
+        mostrarTela('tela-funcionario');
+        renderizarSaudacao();
+        entrarNoTurnoFuncionario();
+      } else mostrarTela('tela-perfil');
     }, 400);
     configurarInstalacaoPWA();
     registrarServiceWorker();
     ativarArrastoGerente();
+    setInterval(verificarTrocaDeTurnoFuncionario, 60000);
   }catch(erro){
     clearTimeout(alarmeTravado);
     console.error('Erro ao iniciar o app:', erro);
@@ -531,13 +567,32 @@ iniciar();
 window.abrirLoginGerente = () => mostrarTela('tela-login-gerente');
 window.validarSenhaGerente = () => {
   const senha = document.getElementById('input-senha-gerente').value;
-  if(senha === (CONFIG.senhaGerente || 'refeitorio2026')){ mostrarTela('tela-gerente'); renderizarCategoriasGerente(); }
-  else toast('Código incorreto');
+  if(senha === (CONFIG.senhaGerente || 'refeitorio2026')){
+    mostrarTela('tela-gerente');
+    const primeiro = turnosAtivos()[0];
+    TURNO_GERENTE_ATIVO = primeiro ? primeiro.id : null;
+    if(TURNO_GERENTE_ATIVO) assinarCardapioTurno(TURNO_GERENTE_ATIVO);
+    renderizarCategoriasGerente();
+  } else toast('Código incorreto');
 };
-window.sairGerente = () => mostrarTela('tela-perfil');
+window.sairGerente = () => { desassinarCardapio(); mostrarTela('tela-perfil'); };
+
+function entrarNoTurnoFuncionario(){
+  checarPedidoLocal();
+  const turno = turnoAtual();
+  if(turno){ assinarCardapioTurno(turno.id); }
+  else { desassinarCardapio(); CARDAPIO_CATEGORIAS = {}; renderizarAreaFuncionario(); }
+}
+function verificarTrocaDeTurnoFuncionario(){
+  if(document.getElementById('tela-funcionario').classList.contains('hide')) return;
+  const turno = turnoAtual();
+  const idAtual = turno ? turno.id : null;
+  if(idAtual !== TURNO_CONTEXTO){ entrarNoTurnoFuncionario(); }
+}
+
 window.irParaFuncionario = async () => {
   const salvo = localStorage.getItem('refeitorio_funcionario');
-  if(salvo){ FUNCIONARIO = JSON.parse(salvo); mostrarTela('tela-funcionario'); renderizarSaudacao(); }
+  if(salvo){ FUNCIONARIO = JSON.parse(salvo); mostrarTela('tela-funcionario'); renderizarSaudacao(); entrarNoTurnoFuncionario(); }
   else {
     await carregarCacheFuncionarios();
     montarCamposIdentificacao();
@@ -661,7 +716,9 @@ async function salvarFuncionarioNaEquipe(dados){
 }
 window.abrirMenuFuncionario = () => {
   if(confirm('Trocar de funcionário / sair deste perfil?')){
-    localStorage.removeItem('refeitorio_funcionario'); FUNCIONARIO = null; mostrarTela('tela-perfil');
+    localStorage.removeItem('refeitorio_funcionario'); FUNCIONARIO = null;
+    desassinarCardapio();
+    mostrarTela('tela-perfil');
   }
 };
 function renderizarSaudacao(){
@@ -676,31 +733,64 @@ function renderizarSaudacao(){
    CARDÁPIO — TEMPO REAL (por categorias)
    ============================================================ */
 let CARDAPIO_JA_TINHA_ITENS = null;
-function escutarCardapioHoje(){
-  const ref = doc(db, PREFIXO+"cardapio", hojeISO());
-  onSnapshot(ref, (snap)=>{
+function assinarCardapioTurno(turnoId){
+  if(UNSUB_CARDAPIO){ UNSUB_CARDAPIO(); UNSUB_CARDAPIO = null; }
+  TURNO_CONTEXTO = turnoId;
+  CARDAPIO_JA_TINHA_ITENS = null;
+  const docId = `${hojeISO()}_${turnoId}`;
+  const ref = doc(db, PREFIXO+"cardapio", docId);
+  UNSUB_CARDAPIO = onSnapshot(ref, (snap)=>{
     CARDAPIO_CATEGORIAS = snap.exists() ? (snap.data().categorias || {}) : {};
-    renderizarCategoriasGerente();
-    renderizarAreaFuncionario();
+    if(!document.getElementById('tela-gerente').classList.contains('hide')) renderizarCategoriasGerente();
+    if(!document.getElementById('tela-funcionario').classList.contains('hide')) renderizarAreaFuncionario();
     const totalItens = Object.values(CARDAPIO_CATEGORIAS).reduce((s,arr)=>s+(arr?.length||0),0);
     const temItensAgora = totalItens > 0;
     if(CARDAPIO_JA_TINHA_ITENS === false && temItensAgora) notificarCardapioPublicado();
     CARDAPIO_JA_TINHA_ITENS = temItensAgora;
   });
 }
+function desassinarCardapio(){
+  if(UNSUB_CARDAPIO){ UNSUB_CARDAPIO(); UNSUB_CARDAPIO = null; }
+  TURNO_CONTEXTO = null;
+  CARDAPIO_CATEGORIAS = {};
+}
 async function salvarCardapioHoje(){
-  await setDoc(doc(db, PREFIXO+"cardapio", hojeISO()), { categorias: CARDAPIO_CATEGORIAS, atualizadoEm: serverTimestamp() }, { merge:true });
+  if(!TURNO_CONTEXTO) return;
+  const docId = `${hojeISO()}_${TURNO_CONTEXTO}`;
+  await setDoc(doc(db, PREFIXO+"cardapio", docId), { categorias: CARDAPIO_CATEGORIAS, atualizadoEm: serverTimestamp() }, { merge:true });
 }
 function notificarCardapioPublicado(){
   if(!CONFIG.notificacoesPublicacao) return;
   if(!('Notification' in window) || Notification.permission !== 'granted') return;
-  try{ new Notification('Cardápio do dia liberado! 🍽️', { body: 'Já dá pra montar o seu prato de hoje.' }); }catch(e){}
+  const nomeTurno = CONFIG.turnos.find(t=>t.id===TURNO_CONTEXTO)?.nome || '';
+  try{ new Notification(`Cardápio ${nomeTurno ? 'de '+nomeTurno+' ' : ''}liberado! 🍽️`, { body: 'Já dá pra montar o seu prato de hoje.' }); }catch(e){}
 }
 
 /* ---------- Render: lado Gerente ---------- */
+function renderizarChipsTurnoCardapio(){
+  const box = document.getElementById('chips-turno-cardapio');
+  if(!box) return;
+  const ativos = turnosAtivos();
+  if(ativos.length<=1){ box.innerHTML=''; return; }
+  box.innerHTML = `<div class="chip-select">
+    ${ativos.map(t=>`<button type="button" class="chip ${TURNO_GERENTE_ATIVO===t.id?'ativo':''}" onclick="trocarTurnoGerente('${t.id}')">${t.nome}</button>`).join('')}
+  </div>`;
+}
+window.trocarTurnoGerente = (turnoId) => {
+  TURNO_GERENTE_ATIVO = turnoId;
+  assinarCardapioTurno(turnoId);
+  renderizarChipsTurnoCardapio();
+  renderizarCategoriasGerente();
+};
+
 function renderizarCategoriasGerente(){
   const box = document.getElementById('secoes-cardapio-gerente');
   if(!box) return;
+  renderizarChipsTurnoCardapio();
+  if(turnosAtivos().length===0){
+    box.innerHTML = `<div class="vazio"><span class="em">⚙️</span>Nenhum turno ativo.<br>Ative em Configurações → Turnos de refeição.</div>`;
+    return;
+  }
   const ativas = categoriasAtivas();
   if(ativas.length===0){
     box.innerHTML = `<div class="vazio"><span class="em">⚙️</span>Nenhuma categoria ativa.<br>Ative em Configurações → Categorias do prato.</div>`;
@@ -729,7 +819,7 @@ function renderizarCardOpcaoGerente(catId, p, i, ehCoringa){
   return `
     <div class="prato-card" data-cat="${catId}" data-idx="${i}" data-coringa="${ehCoringa}">
       <span class="handle-arrastar" data-cat="${catId}" data-idx="${i}" data-coringa="${ehCoringa}">⠿</span>
-      <div class="prato-foto" style="${p.foto ? `background-image:url('${p.foto}')` : ''}">${p.foto ? '' : '🍲'}</div>
+      <div class="prato-foto">🍲${p.foto ? `<img src="${p.foto}" onerror="this.remove()">` : ''}</div>
       <div class="prato-info">
         <p class="nome">${p.nome}</p>
         <p class="desc">${p.descricao || ''}</p>
@@ -918,10 +1008,11 @@ window.confirmarOpcao = async (indiceEdicao, ehCoringa) => {
 };
 
 window.copiarCardapioOntem = async () => {
+  if(!TURNO_GERENTE_ATIVO){ toast('Nenhum turno ativo selecionado'); return; }
   const ontem = new Date(); ontem.setDate(ontem.getDate()-1);
-  const dataOntem = ontem.toISOString().slice(0,10);
+  const dataOntem = `${ontem.toISOString().slice(0,10)}_${TURNO_GERENTE_ATIVO}`;
   const snap = await getDoc(doc(db, PREFIXO+"cardapio", dataOntem));
-  if(!snap.exists() || !snap.data().categorias){ toast('Não encontrei cardápio de ontem'); return; }
+  if(!snap.exists() || !snap.data().categorias){ toast('Não encontrei cardápio de ontem nesse turno'); return; }
   const categoriasOntem = snap.data().categorias;
   Object.keys(categoriasOntem).forEach(catId=>{
     const itens = (categoriasOntem[catId]||[]).map(p=>({ ...p, esgotado:false }));
@@ -1094,13 +1185,17 @@ function renderizarAreaFuncionario(){
   const box = document.getElementById('area-funcionario');
   const barra = document.getElementById('barra-confirmar-prato');
 
-  if(CONFIG.janelaPedidos && !dentroDaJanela()){
-    box.innerHTML = `<div class="vazio"><span class="em">🕐</span>Pedidos abrem das <b>${CONFIG.horaAbertura}</b> às <b>${CONFIG.horaFechamento}</b>.<br>Volte dentro desse horário.</div>`;
+  if(!TURNO_CONTEXTO){
+    document.getElementById('data-hoje-func').textContent = dataFormatada();
+    box.innerHTML = `<div class="vazio"><span class="em">🕐</span>Nenhuma refeição disponível agora.<br>Horários de hoje: ${proximoTurnoTexto()}</div>`;
     barra.classList.add('hide'); return;
   }
+  const nomeTurno = CONFIG.turnos.find(t=>t.id===TURNO_CONTEXTO)?.nome || '';
+  document.getElementById('data-hoje-func').textContent = `${nomeTurno} · ${dataFormatada()}`;
+
   const ativas = categoriasAtivas().filter(cat => itensDaCategoria(cat.id).length > 0);
   if(ativas.length===0){
-    box.innerHTML = `<div class="vazio"><span class="em">🕐</span>O cardápio de hoje ainda não foi publicado.<br>Volte em instantes.</div>`;
+    box.innerHTML = `<div class="vazio"><span class="em">🕐</span>O cardápio de ${nomeTurno.toLowerCase()} ainda não foi publicado.<br>Volte em instantes.</div>`;
     barra.classList.add('hide'); return;
   }
 
@@ -1119,7 +1214,7 @@ function renderizarAreaFuncionario(){
         const selecionado = (SELECOES[cat.id]||[]).includes(p.nome);
         return `
         <div class="opcao-card ${selecionado?'selecionada':''} ${p.esgotado?'esgotada':''}" onclick="${p.esgotado?'':`selecionarOpcao('${cat.id}','${p.nome.replace(/'/g,"\\'")}')`}">
-          <div class="foto-grande" style="${p.foto ? `background-image:url('${p.foto}')` : ''}">${p.foto ? '' : '🍽️'}<div class="check-selo">✓</div></div>
+          <div class="foto-grande">🍽️${p.foto ? `<img src="${p.foto}" onerror="this.remove()">` : ''}<div class="check-selo">✓</div></div>
           <div class="texto">
             <p class="nome serif">${p.nome}</p>
             <p class="desc">${p.descricao || ''}</p>
@@ -1162,16 +1257,25 @@ function atualizarBotaoConfirmar(){
 }
 
 window.confirmarPratoMontado = async () => {
+  if(!TURNO_CONTEXTO){ toast('Nenhuma refeição disponível agora'); return; }
   const obrigatorias = categoriasAtivas().filter(c => c.obrigatorio && itensDaCategoria(c.id).length>0);
   if(obrigatorias.some(c => !(SELECOES[c.id]||[]).length)){ toast('Escolha todas as opções obrigatórias'); return; }
 
   const codigo = String(Math.floor(1000 + Math.random()*9000));
   const escolhas = {};
-  Object.keys(SELECOES).forEach(k => { if(SELECOES[k] && SELECOES[k].length) escolhas[k] = [...SELECOES[k]]; });
+  const fotosEscolhidas = {};
+  Object.keys(SELECOES).forEach(k => {
+    if(SELECOES[k] && SELECOES[k].length){
+      escolhas[k] = [...SELECOES[k]];
+      const itens = itensDaCategoria(k);
+      fotosEscolhidas[k] = SELECOES[k].map(nome => (itens.find(i=>i.nome===nome)||{}).foto || '');
+    }
+  });
   const resumoTexto = categoriasAtivas().filter(c=>escolhas[c.id]).map(c=>escolhas[c.id].join(', ')).join(' + ');
+  const nomeTurno = CONFIG.turnos.find(t=>t.id===TURNO_CONTEXTO)?.nome || '';
 
   const pedido = {
-    data: hojeISO(), escolhas, resumoTexto,
+    data: hojeISO(), turno: TURNO_CONTEXTO, turnoNome: nomeTurno, escolhas, fotosEscolhidas, resumoTexto,
     funcionarioNome: FUNCIONARIO.nome,
     empresaCodigo: FUNCIONARIO.empresaCodigo || null,
     empresaNome: FUNCIONARIO.empresaNome || null,
@@ -1182,7 +1286,7 @@ window.confirmarPratoMontado = async () => {
   };
   const ref = await addDoc(collection(db, PREFIXO+"pedidos"), pedido);
   PEDIDO_ATUAL = { id: ref.id, ...pedido };
-  localStorage.setItem('refeitorio_pedido_'+hojeISO(), JSON.stringify(PEDIDO_ATUAL));
+  localStorage.setItem(`refeitorio_pedido_${hojeISO()}_${TURNO_CONTEXTO}`, JSON.stringify(PEDIDO_ATUAL));
   SELECOES = {};
   renderizarAreaFuncionario();
   toast('Pedido registrado!');
@@ -1193,16 +1297,34 @@ function renderizarConfirmacaoFuncionario(){
   document.getElementById('barra-confirmar-prato').classList.add('hide');
   const linhasResumo = Object.entries(PEDIDO_ATUAL.escolhas || {}).map(([catId, nomes])=>{
     const cat = CONFIG.categorias.find(c=>c.id===catId);
-    return `<div><b>${cat?.nome || catId}:</b> ${Array.isArray(nomes)?nomes.join(', '):nomes}</div>`;
+    const fotos = (PEDIDO_ATUAL.fotosEscolhidas || {})[catId] || [];
+    const lista = Array.isArray(nomes) ? nomes : [nomes];
+    return `
+      <div class="comanda-linha">
+        <span class="comanda-cat">${cat?.nome || catId}</span>
+        <div class="comanda-itens">
+          ${lista.map((nome,i)=>`
+            <div class="comanda-item">
+              <div class="comanda-foto">🍽️${fotos[i] ? `<img src="${fotos[i]}" onerror="this.remove()">` : ''}</div>
+              <span>${nome}</span>
+            </div>`).join('')}
+        </div>
+      </div>`;
   }).join('');
   box.innerHTML = `
     <div class="confirmacao-box">
       <div class="selo">✅</div>
       <h2>Pedido confirmado!</h2>
-      <p>Seu prato de hoje está registrado.</p>
-      <div class="resumo-prato">${linhasResumo}</div>
+      <p>${PEDIDO_ATUAL.turnoNome || ''} · seu prato de hoje está registrado.</p>
       ${PEDIDO_ATUAL.codigoRetirada ? `<p style="margin-top:14px;font-size:12px;opacity:.7;">CÓDIGO DE RETIRADA</p>
       <p style="font-family:'Playfair Display';font-size:34px;font-weight:700;letter-spacing:.05em;margin:2px 0 0;">${PEDIDO_ATUAL.codigoRetirada}</p>` : ''}
+    </div>
+    <div class="comanda-card">
+      <div class="comanda-topo">
+        <span>🎫 Sua comanda</span>
+        <span>${dataFormatada()}</span>
+      </div>
+      ${linhasResumo}
     </div>
     <button class="btn btn-fantasma btn-bloco" style="margin-top:14px;" onclick="trocarPedido()">Trocar de prato</button>
     ${CONFIG.campoSugestoes ? renderizarBlocoSugestao() : ''}
@@ -1222,16 +1344,19 @@ window.enviarSugestao = async () => {
 };
 window.trocarPedido = async () => {
   if(PEDIDO_ATUAL?.id) await deleteDoc(doc(db, PREFIXO+"pedidos", PEDIDO_ATUAL.id));
+  const turnoAntigo = PEDIDO_ATUAL?.turno || TURNO_CONTEXTO;
   PEDIDO_ATUAL = null;
-  localStorage.removeItem('refeitorio_pedido_'+hojeISO());
+  if(turnoAntigo) localStorage.removeItem(`refeitorio_pedido_${hojeISO()}_${turnoAntigo}`);
   renderizarAreaFuncionario();
 };
 function checarPedidoLocal(){
-  const salvo = localStorage.getItem('refeitorio_pedido_'+hojeISO());
+  PEDIDO_ATUAL = null;
+  const turno = turnoAtual();
+  if(!turno) return;
+  const salvo = localStorage.getItem(`refeitorio_pedido_${hojeISO()}_${turno.id}`);
   if(salvo) PEDIDO_ATUAL = JSON.parse(salvo);
 }
-checarPedidoLocal();
-
+// checarPedidoLocal() é chamada em entrarNoTurnoFuncionario(), depois que CONFIG carrega
 /* ============================================================
    PEDIDOS DE HOJE — TEMPO REAL
    ============================================================ */
@@ -1244,17 +1369,18 @@ function escutarPedidosHoje(){
     if(CONFIG?.controlePorcoes) verificarEsgotamentoAutomatico();
   });
 }
-function contarEscolhasDaOpcao(nome){
-  return PEDIDOS_HOJE.filter(p => Object.values(p.escolhas||{}).some(arr => (Array.isArray(arr)?arr:[arr]).includes(nome))).length;
+function contarEscolhasDaOpcao(nome, turnoId){
+  const alvo = turnoId || TURNO_GERENTE_ATIVO;
+  return PEDIDOS_HOJE.filter(p => p.turno===alvo && Object.values(p.escolhas||{}).some(arr => (Array.isArray(arr)?arr:[arr]).includes(nome))).length;
 }
 let JA_ESGOTANDO = false;
 async function verificarEsgotamentoAutomatico(){
-  if(JA_ESGOTANDO) return;
+  if(JA_ESGOTANDO || !TURNO_GERENTE_ATIVO) return;
   let mudou = false;
   Object.keys(CARDAPIO_CATEGORIAS).forEach(catId=>{
     (CARDAPIO_CATEGORIAS[catId]||[]).forEach(p=>{
       if(p.quantidadeTotal > 0 && !p.esgotado){
-        if(contarEscolhasDaOpcao(p.nome) >= p.quantidadeTotal){ p.esgotado = true; mudou = true; }
+        if(contarEscolhasDaOpcao(p.nome, TURNO_GERENTE_ATIVO) >= p.quantidadeTotal){ p.esgotado = true; mudou = true; }
       }
     });
   });
@@ -1271,6 +1397,14 @@ window.trocarTabGerente = (tab) => {
   document.getElementById('painel-relatorio').classList.toggle('hide', tab!=='relatorio');
   document.getElementById('painel-equipe').classList.toggle('hide', tab!=='equipe');
   document.getElementById('painel-config').classList.toggle('hide', tab!=='config');
+  if(tab==='cardapio'){
+    const ativos = turnosAtivos();
+    if(!ativos.find(t=>t.id===TURNO_GERENTE_ATIVO)){
+      TURNO_GERENTE_ATIVO = ativos[0] ? ativos[0].id : null;
+      if(TURNO_GERENTE_ATIVO) assinarCardapioTurno(TURNO_GERENTE_ATIVO); else desassinarCardapio();
+    }
+    renderizarCategoriasGerente();
+  }
   if(tab==='relatorio') renderizarRelatorio();
   if(tab==='equipe') renderizarEquipe();
   if(tab==='config') renderizarConfig();
@@ -1279,42 +1413,61 @@ window.trocarTabGerente = (tab) => {
 /* ============================================================
    RELATÓRIO
    ============================================================ */
+let TURNO_RELATORIO_FILTRO = 'todos';
+function unidadeLabel(u){ return ({porcao:'porção(ões)', kg:'kg', g:'g', litro:'L', ml:'ml'})[u] || 'porção(ões)'; }
+
+function renderizarChipsTurnoRelatorio(){
+  const ativos = turnosAtivos();
+  if(ativos.length<=1) return '';
+  return `<div class="chip-select" style="margin-bottom:16px;">
+    <button type="button" class="chip ${TURNO_RELATORIO_FILTRO==='todos'?'ativo':''}" onclick="filtrarRelatorioPorTurno('todos')">Todos</button>
+    ${ativos.map(t=>`<button type="button" class="chip ${TURNO_RELATORIO_FILTRO===t.id?'ativo':''}" onclick="filtrarRelatorioPorTurno('${t.id}')">${t.nome}</button>`).join('')}
+  </div>`;
+}
+window.filtrarRelatorioPorTurno = (turnoId) => { TURNO_RELATORIO_FILTRO = turnoId; renderizarRelatorio(); };
+
 function renderizarRelatorio(){
   const box = document.getElementById('painel-relatorio');
-  const total = PEDIDOS_HOJE.length;
+  const pedidosFiltrados = TURNO_RELATORIO_FILTRO==='todos' ? PEDIDOS_HOJE : PEDIDOS_HOJE.filter(p=>p.turno===TURNO_RELATORIO_FILTRO);
+  const total = pedidosFiltrados.length;
   const contagemPorCategoria = {};
   categoriasAtivas().forEach(cat=>{
     const contagem = {};
-    PEDIDOS_HOJE.forEach(p=>{
+    pedidosFiltrados.forEach(p=>{
       const escolha = p.escolhas?.[cat.id];
       (Array.isArray(escolha)?escolha:(escolha?[escolha]:[])).forEach(nome=>{ contagem[nome]=(contagem[nome]||0)+1; });
     });
-    if(Object.keys(contagem).length) contagemPorCategoria[cat.nome] = contagem;
+    if(Object.keys(contagem).length) contagemPorCategoria[cat.nome] = { contagem, cat };
   });
   const contagemEmpresas = {};
-  PEDIDOS_HOJE.forEach(p => { const nome = p.empresaNome || 'Não informado'; contagemEmpresas[nome] = (contagemEmpresas[nome]||0)+1; });
+  pedidosFiltrados.forEach(p => { const nome = p.empresaNome || 'Não informado'; contagemEmpresas[nome] = (contagemEmpresas[nome]||0)+1; });
 
   box.innerHTML = `
+    ${renderizarChipsTurnoRelatorio()}
     <div class="stat-grid">
-      <div class="stat-box"><div class="num">${total}</div><div class="lbl">Pedidos hoje</div></div>
+      <div class="stat-box"><div class="num">${total}</div><div class="lbl">Pedidos</div></div>
       <div class="stat-box"><div class="num">${Object.keys(contagemEmpresas).length}</div><div class="lbl">Empresas</div></div>
     </div>
-    ${Object.entries(contagemPorCategoria).map(([catNome, contagem])=>{
+    ${Object.entries(contagemPorCategoria).map(([catNome, {contagem, cat}])=>{
       const maior = Math.max(1, ...Object.values(contagem));
+      const usaProducao = CONFIG.planejamentoProducao && cat.unidadeMedida && cat.unidadeMedida !== 'porcao';
       return `<label class="rotulo">${catNome}</label>
-        ${Object.entries(contagem).map(([nome,qtd])=>`
-          <div class="barra-item"><div class="nome">${nome}</div>
+        ${Object.entries(contagem).map(([nome,qtd])=>{
+          const producao = usaProducao ? `≈ ${(qtd*(cat.percapita||1)).toLocaleString('pt-BR',{maximumFractionDigits:2})} ${unidadeLabel(cat.unidadeMedida)}` : '';
+          return `<div class="barra-item"><div class="nome">${nome}</div>
             <div class="barra-fundo"><div class="barra-preenchida" style="width:${(qtd/maior)*100}%"></div></div>
-            <div class="qtd">${qtd}</div></div>`).join('')}`;
+            <div class="qtd">${qtd}</div></div>
+            ${producao ? `<div style="font-size:11px;color:var(--amber);margin:-6px 0 8px 0;padding-left:2px;">${producao}</div>` : ''}`;
+        }).join('')}`;
     }).join('') || '<p style="color:var(--ink-soft);font-size:13px;">Nenhum pedido ainda.</p>'}
     ${Object.keys(contagemEmpresas).length ? `<label class="rotulo" style="margin-top:20px;">Por empresa</label>
       ${Object.entries(contagemEmpresas).map(([nome,qtd])=>`
         <div class="barra-item"><div class="nome">${nome}</div>
           <div class="barra-fundo"><div class="barra-preenchida" style="width:${(qtd/total)*100}%"></div></div>
           <div class="qtd">${qtd}</div></div>`).join('')}` : ''}
-    <label class="rotulo" style="margin-top:26px;">Pedidos de hoje (retirada)</label>
-    ${PEDIDOS_HOJE.length ? PEDIDOS_HOJE.map(p=>`
-      <div class="linha-config"><div class="txt"><b>${p.funcionarioNome}</b><span>${p.resumoTexto || ''}${p.codigoRetirada ? ' · cód. '+p.codigoRetirada : ''}</span></div>
+    <label class="rotulo" style="margin-top:26px;">Pedidos (retirada)</label>
+    ${pedidosFiltrados.length ? pedidosFiltrados.map(p=>`
+      <div class="linha-config"><div class="txt"><b>${p.funcionarioNome}</b><span>${p.turnoNome ? p.turnoNome+' · ' : ''}${p.resumoTexto || ''}${p.codigoRetirada ? ' · cód. '+p.codigoRetirada : ''}</span></div>
         <div class="switch ${p.retirado?'on':''}" onclick="alternarRetirado('${p.id}', ${!p.retirado})"><div class="bolinha"></div></div></div>`).join('') : '<p style="color:var(--ink-soft);font-size:13px;">Nenhum pedido ainda.</p>'}
     <label class="rotulo" style="margin-top:26px;">Relatório por período</label>
     <div style="display:flex;gap:8px;"><input type="date" class="campo" id="rp-inicio"><input type="date" class="campo" id="rp-fim"></div>
@@ -1359,7 +1512,7 @@ async function renderizarEquipe(){
   funcionarios.sort((a,b)=> (a.nome||'').localeCompare(b.nome||''));
   box.innerHTML = funcionarios.map(f => `
     <div class="prato-card" style="align-items:center;">
-      <div class="prato-foto" style="${f.foto ? `background-image:url('${f.foto}')` : ''}">${f.foto ? '' : '🧑‍🏭'}</div>
+      <div class="prato-foto">🧑‍🏭${f.foto ? `<img src="${f.foto}" onerror="this.remove()">` : ''}</div>
       <div class="prato-info"><p class="nome" style="font-size:15px;">${f.nome}</p>
         <p class="desc">${f.empresaNome || ''}${f.matricula ? ' · matrícula '+f.matricula : ''}${f.telefone ? ' · '+f.telefone : ''}</p></div>
     </div>`).join('');
@@ -1394,6 +1547,21 @@ function renderizarConfig(){
               ${[1,2,3].map(n=>`<button type="button" class="chip ${(cat.colunas||1)===n?'ativo':''}" onclick="definirColunas(${i}, ${n})">${n}</button>`).join('')}
             </div>
           </div>
+          ${CONFIG.planejamentoProducao ? `
+          <div class="qtd-escolhas">
+            <span>Medir em</span>
+            <select class="campo" style="width:auto;padding:6px 10px;margin:0;font-size:12.5px;" onchange="definirUnidadeMedida(${i}, this.value)">
+              ${[['porcao','Porção/unidade'],['kg','Quilo (kg)'],['g','Grama (g)'],['litro','Litro (L)'],['ml','Mililitro (ml)']]
+                .map(([v,l])=>`<option value="${v}" ${(cat.unidadeMedida||'porcao')===v?'selected':''}>${l}</option>`).join('')}
+            </select>
+          </div>
+          ${(cat.unidadeMedida && cat.unidadeMedida!=='porcao') ? `
+          <div class="qtd-escolhas">
+            <span>Per capita (por pessoa)</span>
+            <input type="number" step="0.01" min="0" style="width:70px;" value="${cat.percapita||1}" onchange="definirPercapita(${i}, this.value)">
+            <span>${unidadeLabel(cat.unidadeMedida)}</span>
+          </div>` : ''}
+          ` : ''}
         </div>`).join('')}
     </div>
     <button class="btn btn-fantasma btn-bloco" onclick="adicionarCategoria()">+ Adicionar categoria</button>
@@ -1416,11 +1584,24 @@ function renderizarConfig(){
       <div class="switch ${CONFIG.campoSugestoes?'on':''}" onclick="alternarConfig('campoSugestoes')"><div class="bolinha"></div></div></div>
     <div class="linha-config"><div class="txt"><b>Controle de porções</b><span>Opção esgota sozinha</span></div>
       <div class="switch ${CONFIG.controlePorcoes?'on':''}" onclick="alternarConfig('controlePorcoes')"><div class="bolinha"></div></div></div>
-    <div class="linha-config"><div class="txt"><b>Restringir horário de pedidos</b><span>Só permite escolher na janela</span></div>
-      <div class="switch ${CONFIG.janelaPedidos?'on':''}" onclick="alternarConfig('janelaPedidos')"><div class="bolinha"></div></div></div>
-    ${CONFIG.janelaPedidos ? `<div style="display:flex;gap:8px;margin-bottom:10px;">
-      <div style="flex:1;"><label class="rotulo">Abre às</label><input type="time" class="campo" id="cfg-hora-abertura" value="${CONFIG.horaAbertura}" onchange="salvarHorarios()"></div>
-      <div style="flex:1;"><label class="rotulo">Fecha às</label><input type="time" class="campo" id="cfg-hora-fechamento" value="${CONFIG.horaFechamento}" onchange="salvarHorarios()"></div></div>` : ''}
+    <div class="linha-config"><div class="txt"><b>Planejamento de produção</b><span>Calcula kg/porções necessários por item, no Relatório</span></div>
+      <div class="switch ${CONFIG.planejamentoProducao?'on':''}" onclick="alternarConfig('planejamentoProducao')"><div class="bolinha"></div></div></div>
+
+    <label class="rotulo" style="margin-top:22px;">Turnos de refeição</label>
+    <div id="lista-turnos">
+      ${CONFIG.turnos.map((t,i)=>`
+        <div class="categoria-config-item">
+          <div class="linha1">
+            <input class="nome-cat" value="${t.nome}" onchange="renomearTurno(${i}, this.value)">
+            <div class="switch ${t.ativo?'on':''}" onclick="alternarTurnoAtivo(${i})"><div class="bolinha"></div></div>
+          </div>
+          ${t.ativo ? `<div style="display:flex;gap:8px;margin-top:8px;">
+            <div style="flex:1;"><label class="rotulo" style="margin:0 0 4px;">Abre às</label><input type="time" class="campo" style="margin:0;" value="${t.horaAbertura}" onchange="definirHorarioTurno(${i},'horaAbertura',this.value)"></div>
+            <div style="flex:1;"><label class="rotulo" style="margin:0 0 4px;">Fecha às</label><input type="time" class="campo" style="margin:0;" value="${t.horaFechamento}" onchange="definirHorarioTurno(${i},'horaFechamento',this.value)"></div>
+          </div>` : ''}
+        </div>`).join('')}
+    </div>
+
     <div class="linha-config"><div class="txt"><b>Notificar cardápio publicado</b><span>Precisa do app aberto</span></div>
       <div class="switch ${CONFIG.notificacoesPublicacao?'on':''}" onclick="alternarNotificacoes()"><div class="bolinha"></div></div></div>
     <div class="linha-config"><div class="txt"><b>Cadastro por foto (IA)</b><span>Preenche a partir da foto</span></div>
@@ -1451,11 +1632,22 @@ window.renomearCategoria = async (i, valor) => { CONFIG.categorias[i].nome = val
 window.definirInstrucao = async (i, valor) => { CONFIG.categorias[i].instrucao = valor.trim(); await salvarConfig(); };
 window.definirMaxEscolhas = async (i, valor) => { CONFIG.categorias[i].maxEscolhas = Math.max(1, Math.min(6, parseInt(valor)||1)); await salvarConfig(); };
 window.definirColunas = async (i, n) => { CONFIG.categorias[i].colunas = n; await salvarConfig(); renderizarConfig(); };
+window.definirUnidadeMedida = async (i, v) => { CONFIG.categorias[i].unidadeMedida = v; if(!CONFIG.categorias[i].percapita) CONFIG.categorias[i].percapita = 1; await salvarConfig(); renderizarConfig(); };
+window.definirPercapita = async (i, v) => { CONFIG.categorias[i].percapita = parseFloat(v)||1; await salvarConfig(); };
+
+window.renomearTurno = async (i, valor) => { CONFIG.turnos[i].nome = valor.trim() || CONFIG.turnos[i].nome; await salvarConfig(); };
+window.alternarTurnoAtivo = async (i) => {
+  CONFIG.turnos[i].ativo = !CONFIG.turnos[i].ativo;
+  await salvarConfig();
+  renderizarConfig();
+  // se o turno do gerente ficou inválido, a próxima ida pra aba Cardápio já recalcula sozinha
+};
+window.definirHorarioTurno = async (i, campo, valor) => { CONFIG.turnos[i][campo] = valor; await salvarConfig(); };
 window.alternarCategoriaCampo = async (i, campo, valor) => { CONFIG.categorias[i][campo] = valor; await salvarConfig(); renderizarCategoriasGerente(); };
 window.adicionarCategoria = async () => {
   const nome = prompt('Nome da nova categoria (ex: Massa, Bebida):');
   if(!nome) return;
-  CONFIG.categorias.push({ id:'cat'+Date.now(), nome, ativo:true, obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1 });
+  CONFIG.categorias.push({ id:'cat'+Date.now(), nome, ativo:true, obrigatorio:false, maxEscolhas:1, instrucao:'', colunas:1, unidadeMedida:'porcao', percapita:1 });
   await salvarConfig(); renderizarConfig(); renderizarCategoriasGerente();
 };
 window.removerCategoria = async (i) => {
@@ -1476,11 +1668,6 @@ window.salvarSenha = async () => {
   const v = document.getElementById('cfg-senha').value.trim();
   if(!v){ toast('Digite uma senha'); return; }
   CONFIG.senhaGerente = v; await salvarConfig(); toast('Senha atualizada!');
-};
-window.salvarHorarios = async () => {
-  CONFIG.horaAbertura = document.getElementById('cfg-hora-abertura').value;
-  CONFIG.horaFechamento = document.getElementById('cfg-hora-fechamento').value;
-  await salvarConfig(); toast('Horário salvo!');
 };
 window.salvarChaveIA = async () => { CONFIG.iaApiKey = document.getElementById('cfg-ia-key').value.trim(); await salvarConfig(); toast('Chave salva!'); };
 window.alternarNotificacoes = async () => {
