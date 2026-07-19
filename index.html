@@ -390,15 +390,31 @@ async function uploadFotoSupabase(file, caminho){
   const url = `${SUPABASE_URL}/storage/v1/object/${SUPABASE_BUCKET}/${caminho}`;
   const resp = await fetch(url, {
     method: "POST",
-    headers: { "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "apikey": SUPABASE_ANON_KEY, "Content-Type": file.type, "x-upsert": "true" },
+    headers: { "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "apikey": SUPABASE_ANON_KEY, "Content-Type": file.type || 'application/octet-stream', "x-upsert": "true" },
     body: file
   });
   if(!resp.ok){
     let detalhe = '';
     try{ detalhe = (await resp.json()).message || await resp.text(); }catch(e){ detalhe = resp.statusText; }
-    throw new Error(`${resp.status}: ${detalhe}`);
+    throw new Error(`Upload recusado (${resp.status}): ${detalhe}`);
   }
-  return `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${caminho}`;
+  const urlPublica = `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${caminho}`;
+
+  // confirma que a URL pública realmente abre antes de considerar sucesso
+  try{
+    const verifica = await fetch(urlPublica, { method: "GET", cache: "no-store" });
+    if(!verifica.ok){
+      let detalheVerif = '';
+      try{ detalheVerif = (await verifica.json()).message || await verifica.text(); }catch(e){ detalheVerif = verifica.statusText; }
+      throw new Error(`Upload OK, mas a foto não abre depois (${verifica.status}): ${detalheVerif}. Verifique se o bucket "${SUPABASE_BUCKET}" está mesmo marcado como Public no Supabase.`);
+    }
+  }catch(erroVerif){
+    if(erroVerif instanceof TypeError){
+      throw new Error(`Upload OK, mas não consegui verificar a URL pública (erro de rede/CORS). Confira se o bucket "${SUPABASE_BUCKET}" está público.`);
+    }
+    throw erroVerif;
+  }
+  return urlPublica;
 }
 function arquivoParaBase64(file){
   return new Promise((resolve, reject) => {
@@ -491,8 +507,11 @@ function mostrarTela(id){
   document.getElementById(id).classList.remove('hide');
 }
 function toast(msg){
-  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
-  document.body.appendChild(t); setTimeout(()=>t.remove(), 2800);
+  const anterior = document.getElementById('toast-atual');
+  if(anterior) anterior.remove();
+  const t = document.createElement('div'); t.id = 'toast-atual'; t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{ if(t.parentNode) t.remove(); }, 2800);
 }
 function categoriasAtivas(){ return CONFIG.categorias.filter(c=>c.ativo); }
 function itensDaCategoria(catId){
