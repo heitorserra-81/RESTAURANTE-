@@ -345,7 +345,7 @@
     <div class="conteudo hide" id="painel-config"></div>
   </div>
 
-  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto · v2026.07.19-3</div>
+  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto · v2026.07.20-1</div>
 </div>
 
 <div id="banner-instalar" class="hide">
@@ -983,7 +983,7 @@ window.abrirModalOpcao = (catId, indiceEdicao, ehCoringa) => {
         <label class="rotulo">Foto</label>
         <input type="file" accept="image/*" class="campo" id="np-foto" onchange="previsualizarFoto(this)">
         <div id="np-preview-container" style="margin:-4px 0 10px;">
-          ${p?.foto ? `<img src="${p.foto}" style="width:64px;height:64px;border-radius:10px;object-fit:cover;" onerror="this.outerHTML='<p style=&quot;font-size:11.5px;color:var(--tomato);&quot;>⚠️ A foto salva não está carregando.</p>'">` : ''}
+          ${p?.foto ? `<img src="${p.foto}" style="width:64px;height:64px;border-radius:10px;object-fit:cover;" onerror="this.outerHTML='<p style=&quot;font-size:11.5px;color:var(--tomato);&quot;>⚠️ A foto salva não está carregando. URL: <span style=&quot;word-break:break-all;user-select:all;&quot;>${p.foto.replace(/'/g,"&#39;")}</span></p>'">` : ''}
         </div>
         <p id="np-foto-status" style="font-size:12px;margin:-6px 0 10px;"></p>
         ${CONFIG.iaAtivada && !ehCoringa ? `<button type="button" class="btn btn-fantasma btn-bloco" style="margin-bottom:10px;" onclick="preencherComIA()">🪄 Preencher com IA a partir da foto</button>
