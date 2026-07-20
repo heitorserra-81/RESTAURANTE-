@@ -334,6 +334,7 @@
     <div class="conteudo" id="painel-cardapio">
       <div id="chips-turno-cardapio" style="margin-bottom:14px;"></div>
       <button class="btn btn-fantasma btn-bloco" style="margin-bottom:10px;" onclick="copiarCardapioOntem()">↺ Copiar cardápio de ontem</button>
+      <div id="botoes-padrao-semana"></div>
       <button class="btn btn-amber btn-bloco" style="margin-bottom:14px;" onclick="abrirModalCardapioIA()">🪄 Cardápio completo por IA</button>
       <p style="font-size:11.5px;color:var(--ink-soft);margin:-6px 0 14px;">Segure o ⠿ pra reordenar os itens dentro de cada categoria.</p>
       <div id="secoes-cardapio-gerente"></div>
@@ -344,7 +345,7 @@
     <div class="conteudo hide" id="painel-config"></div>
   </div>
 
-  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto · v2026.07.19-2</div>
+  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto · v2026.07.19-3</div>
 </div>
 
 <div id="banner-instalar" class="hide">
@@ -452,6 +453,7 @@ const CONFIG_PADRAO = {
     { id:'ceia',   nome:'Ceia',    ativo:false, horaAbertura:'21:00', horaFechamento:'23:30' }
   ],
   planejamentoProducao: false,
+  padroesSemana: false,
   notificacoesPublicacao: false,
   iaAtivada: false,
   iaApiKey: "",
@@ -653,7 +655,7 @@ function montarCamposIdentificacao(){
   } else if(CONFIG.identificacao === "telefone"){
     html += `<label class="rotulo">WhatsApp</label><input class="campo" id="id-telefone" inputmode="numeric" placeholder="(19) 90000-0000">`;
   }
-  if(CONFIG.fotoFuncionario){ html += `<label class="rotulo">Sua foto</label><input type="file" accept="image/*" class="campo" id="id-foto"><p style="font-size:11.5px;color:var(--ink-soft);margin:-6px 0 10px;">Se você já se reconheceu acima, pode deixar em branco — usamos a foto que já temos.</p>`; }
+  if(CONFIG.fotoFuncionario){ html += `<label class="rotulo">Sua foto</label><input type="file" accept="image/*" class="campo" id="id-foto"><p style="font-size:11.5px;color:var(--ink-soft);margin:-6px 0 6px;">Se você já se reconheceu acima, pode deixar em branco — usamos a foto que já temos.</p><p id="id-foto-status" style="font-size:12px;margin:-2px 0 10px;"></p>`; }
   box.innerHTML = html;
 }
 
@@ -713,6 +715,8 @@ window.salvarIdentificacao = async () => {
 
   if(CONFIG.fotoFuncionario){
     const fotoInput = document.getElementById('id-foto');
+    const statusFoto = document.getElementById('id-foto-status');
+    if(statusFoto) statusFoto.textContent = '';
     if(fotoInput?.files[0]){
       try{
         toast('Enviando foto…');
@@ -720,7 +724,11 @@ window.salvarIdentificacao = async () => {
         dados.foto = await uploadFotoSupabase(fotoInput.files[0], caminho);
       }catch(e){
         console.error('Erro no upload da foto do funcionário:', e);
-        alert('Não consegui enviar sua foto:\n\n' + e.message + '\n\nSeu cadastro vai continuar sem foto — pode tentar de novo depois.');
+        if(statusFoto){
+          statusFoto.style.color = 'var(--tomato)';
+          statusFoto.textContent = '⚠️ Não consegui enviar sua foto: ' + e.message + ' — toque em "Continuar" de novo pra tentar mais uma vez.';
+        }
+        return; // não continua ainda — deixa o funcionário ver o erro
       }
     }
   }
@@ -816,6 +824,7 @@ function renderizarCategoriasGerente(){
   const box = document.getElementById('secoes-cardapio-gerente');
   if(!box) return;
   renderizarChipsTurnoCardapio();
+  renderizarBotoesPadraoSemana();
   if(turnosAtivos().length===0){
     box.innerHTML = `<div class="vazio"><span class="em">⚙️</span>Nenhum turno ativo.<br>Ative em Configurações → Turnos de refeição.</div>`;
     return;
@@ -976,6 +985,7 @@ window.abrirModalOpcao = (catId, indiceEdicao, ehCoringa) => {
         <div id="np-preview-container" style="margin:-4px 0 10px;">
           ${p?.foto ? `<img src="${p.foto}" style="width:64px;height:64px;border-radius:10px;object-fit:cover;" onerror="this.outerHTML='<p style=&quot;font-size:11.5px;color:var(--tomato);&quot;>⚠️ A foto salva não está carregando.</p>'">` : ''}
         </div>
+        <p id="np-foto-status" style="font-size:12px;margin:-6px 0 10px;"></p>
         ${CONFIG.iaAtivada && !ehCoringa ? `<button type="button" class="btn btn-fantasma btn-bloco" style="margin-bottom:10px;" onclick="preencherComIA()">🪄 Preencher com IA a partir da foto</button>
         <p id="ia-status" style="font-size:12px;color:var(--ink-soft);margin:-4px 0 10px;"></p>` : ''}
         <label class="rotulo">Nome</label>
@@ -1016,6 +1026,8 @@ window.confirmarOpcao = async (indiceEdicao, ehCoringa) => {
   const catId = CATEGORIA_MODAL_ATUAL;
 
   let fotoUrl = editando ? ((ehCoringa ? CONFIG.coringas[catId][indiceEdicao] : CARDAPIO_CATEGORIAS[catId][indiceEdicao]).foto || "") : "";
+  const statusEl = document.getElementById('np-foto-status');
+  if(statusEl) statusEl.textContent = '';
   if(fotoInput.files[0]){
     try{
       toast('Enviando foto…');
@@ -1024,7 +1036,11 @@ window.confirmarOpcao = async (indiceEdicao, ehCoringa) => {
       console.log('Foto enviada com sucesso:', fotoUrl);
     }catch(e){
       console.error('Erro no upload da foto:', e);
-      alert('Não consegui enviar a foto:\n\n' + e.message + '\n\nO item vai ser salvo sem foto — você pode editar depois e tentar de novo.');
+      if(statusEl){
+        statusEl.style.color = 'var(--tomato)';
+        statusEl.textContent = '⚠️ Não consegui enviar a foto: ' + e.message + ' — toque em "Adicionar" de novo pra tentar mais uma vez, ou salve sem foto.';
+      }
+      return; // não salva ainda — deixa o gerente ver o erro e decidir
     }
   }
 
@@ -1066,6 +1082,49 @@ window.copiarCardapioOntem = async () => {
   });
   await salvarCardapioHoje();
   toast('Cardápio de ontem copiado!');
+};
+
+/* ---------- Padrão semanal (ex: "toda segunda é assim") ---------- */
+const NOMES_DIA_SEMANA = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+function idPadraoSemana(turnoId, diaIndex){ return `${turnoId}_${diaIndex}`; }
+
+function renderizarBotoesPadraoSemana(){
+  const box = document.getElementById('botoes-padrao-semana');
+  if(!box) return;
+  if(!CONFIG.padroesSemana || !TURNO_GERENTE_ATIVO){ box.innerHTML=''; return; }
+  const diaIndex = new Date().getDay();
+  const nomeDia = NOMES_DIA_SEMANA[diaIndex];
+  box.innerHTML = `
+    <button class="btn btn-fantasma btn-bloco" style="margin-bottom:10px;" onclick="salvarPadraoSemana()">💾 Salvar como padrão de ${nomeDia}</button>
+    <button class="btn btn-fantasma btn-bloco" style="margin-bottom:10px;" onclick="restaurarPadraoSemana()">↺ Restaurar padrão de ${nomeDia}</button>
+  `;
+}
+
+window.salvarPadraoSemana = async () => {
+  if(!TURNO_GERENTE_ATIVO) return;
+  const diaIndex = new Date().getDay();
+  const nomeDia = NOMES_DIA_SEMANA[diaIndex];
+  if(!confirm(`Salvar o cardápio de hoje como o padrão fixo de toda ${nomeDia}? Isso substitui o padrão anterior desse dia, se existir.`)) return;
+  const id = idPadraoSemana(TURNO_GERENTE_ATIVO, diaIndex);
+  await setDoc(doc(db, PREFIXO+"padroes_semana", id), { categorias: CARDAPIO_CATEGORIAS, atualizadoEm: serverTimestamp() });
+  toast(`Padrão de ${nomeDia} salvo!`);
+};
+
+window.restaurarPadraoSemana = async () => {
+  if(!TURNO_GERENTE_ATIVO) return;
+  const diaIndex = new Date().getDay();
+  const nomeDia = NOMES_DIA_SEMANA[diaIndex];
+  const id = idPadraoSemana(TURNO_GERENTE_ATIVO, diaIndex);
+  const snap = await getDoc(doc(db, PREFIXO+"padroes_semana", id));
+  if(!snap.exists() || !snap.data().categorias){ toast(`Nenhum padrão salvo ainda pra ${nomeDia}`); return; }
+  if(!confirm(`Restaurar o padrão de ${nomeDia}? Isso substitui o cardápio de hoje inteiro (desse turno) pelo padrão salvo.`)) return;
+  CARDAPIO_CATEGORIAS = JSON.parse(JSON.stringify(snap.data().categorias));
+  Object.keys(CARDAPIO_CATEGORIAS).forEach(catId=>{
+    CARDAPIO_CATEGORIAS[catId].forEach(p=>{ p.esgotado = false; });
+  });
+  await salvarCardapioHoje();
+  renderizarCategoriasGerente();
+  toast(`Padrão de ${nomeDia} restaurado!`);
 };
 
 /* ============================================================
@@ -1632,7 +1691,8 @@ function renderizarConfig(){
       <div class="switch ${CONFIG.controlePorcoes?'on':''}" onclick="alternarConfig('controlePorcoes')"><div class="bolinha"></div></div></div>
     <div class="linha-config"><div class="txt"><b>Planejamento de produção</b><span>Calcula kg/porções necessários por item, no Relatório</span></div>
       <div class="switch ${CONFIG.planejamentoProducao?'on':''}" onclick="alternarConfig('planejamentoProducao')"><div class="bolinha"></div></div></div>
-
+    <div class="linha-config"><div class="txt"><b>Cardápio padrão por dia da semana</b><span>Salva e restaura um cardápio fixo pra cada dia (ex: toda segunda)</span></div>
+      <div class="switch ${CONFIG.padroesSemana?'on':''}" onclick="alternarConfig('padroesSemana')"><div class="bolinha"></div></div></div>
     <label class="rotulo" style="margin-top:22px;">Turnos de refeição</label>
     <div id="lista-turnos">
       ${CONFIG.turnos.map((t,i)=>`
