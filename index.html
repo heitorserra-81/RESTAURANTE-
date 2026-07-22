@@ -345,7 +345,7 @@
     <div class="conteudo hide" id="painel-config"></div>
   </div>
 
-  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto · v2026.07.20-1</div>
+  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto · v2026.07.20-2</div>
 </div>
 
 <div id="banner-instalar" class="hide">
@@ -1723,6 +1723,10 @@ function renderizarConfig(){
       </div>` : ''}
     <div class="linha-config" style="margin-top:10px;"><div class="txt"><b>Foto do funcionário</b><span>Pede foto no primeiro acesso</span></div>
       <div class="switch ${CONFIG.fotoFuncionario?'on':''}" onclick="alternarConfig('fotoFuncionario')"><div class="bolinha"></div></div></div>
+    <label class="rotulo" style="margin-top:22px;">Diagnóstico</label>
+    <button class="btn btn-fantasma btn-bloco" onclick="testarSupabase()">🔧 Testar conexão com o Supabase</button>
+    <div id="resultado-teste-supabase"></div>
+
     <label class="rotulo" style="margin-top:22px;">Senha de acesso do gerente</label>
     <input class="campo" id="cfg-senha" type="text" value="${CONFIG.senhaGerente}" onchange="salvarSenha()">
     <label class="rotulo" style="margin-top:22px;">Empresas atendidas</label>
@@ -1788,6 +1792,64 @@ window.adicionarEmpresa = async () => {
   CONFIG.empresas.push({ codigo: 'emp'+Date.now(), nome }); await salvarConfig(); renderizarConfig();
 };
 window.removerEmpresa = async (i) => { CONFIG.empresas.splice(i,1); await salvarConfig(); renderizarConfig(); };
+
+window.testarSupabase = async () => {
+  const box = document.getElementById('resultado-teste-supabase');
+  const linhas = [];
+  function log(texto, cor){
+    linhas.push(`<div style="padding:6px 0;border-bottom:1px solid var(--line);font-size:12.5px;${cor?`color:${cor};`:''}word-break:break-all;">${texto}</div>`);
+    box.innerHTML = `<div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;">${linhas.join('')}</div>`;
+  }
+  box.innerHTML = '';
+  log('🔧 Iniciando teste…');
+  log(`URL do bucket configurada: ${SUPABASE_URL}/storage/v1/object/${SUPABASE_BUCKET}/`);
+
+  // 1) Testa upload de um arquivo pequeno de teste
+  const conteudoTeste = new Blob(['teste-refeitorio-' + Date.now()], { type: 'text/plain' });
+  const caminhoTeste = `_teste/diagnostico_${Date.now()}.txt`;
+  const urlUpload = `${SUPABASE_URL}/storage/v1/object/${SUPABASE_BUCKET}/${caminhoTeste}`;
+
+  try{
+    log('1️⃣ Enviando arquivo de teste…');
+    const respUpload = await fetch(urlUpload, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "apikey": SUPABASE_ANON_KEY, "Content-Type": "text/plain", "x-upsert": "true" },
+      body: conteudoTeste
+    });
+    const textoUpload = await respUpload.text();
+    if(respUpload.ok){
+      log(`✅ Upload OK — status ${respUpload.status}`, '#8fd19e');
+    } else {
+      log(`❌ Upload falhou — status ${respUpload.status}`, 'var(--tomato)');
+      log(`Resposta do Supabase: ${textoUpload}`, 'var(--tomato)');
+      log('⛔ Parou aqui — o problema é no ENVIO (permissão de INSERT). Confira a política de upload no Supabase.', 'var(--tomato)');
+      return;
+    }
+  }catch(e){
+    log(`❌ Erro de rede ao tentar enviar: ${e.message}`, 'var(--tomato)');
+    log('⛔ Isso pode ser CORS bloqueando, ou a URL do Supabase errada.', 'var(--tomato)');
+    return;
+  }
+
+  // 2) Testa se consegue ler de volta (URL pública)
+  const urlPublica = `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${caminhoTeste}`;
+  log(`URL pública gerada: ${urlPublica}`);
+  try{
+    log('2️⃣ Tentando abrir a URL pública de volta…');
+    const respLeitura = await fetch(urlPublica, { method: "GET", cache: "no-store" });
+    const textoLeitura = await respLeitura.text();
+    if(respLeitura.ok){
+      log(`✅ Leitura pública OK — status ${respLeitura.status}. Conteúdo bate: ${textoLeitura.includes('teste-refeitorio') ? 'sim' : 'não'}`, '#8fd19e');
+      log('🎉 Upload e leitura funcionando! Se as fotos dos pratos ainda não aparecem, o problema pode ser só nas fotos antigas (já salvas quebradas antes) — exclua e recadastre esses itens específicos.', '#8fd19e');
+    } else {
+      log(`❌ Leitura pública falhou — status ${respLeitura.status}`, 'var(--tomato)');
+      log(`Resposta do Supabase: ${textoLeitura}`, 'var(--tomato)');
+      log('⛔ O upload funciona, mas ler de volta não — o bucket provavelmente NÃO está marcado como Public de verdade. Confira Storage → bucket refeitorio → Settings → "Public bucket".', 'var(--tomato)');
+    }
+  }catch(e){
+    log(`❌ Erro de rede ao tentar ler: ${e.message}`, 'var(--tomato)');
+  }
+};
 
 /* ============================================================
    PWA — instalação e service worker
