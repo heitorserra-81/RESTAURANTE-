@@ -68,6 +68,8 @@
   .marca p{color:var(--ink-soft);font-size:14px;margin:0;}
   .cartao-opcao{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
     padding:20px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);}
+  .link-discreto{color:var(--ink-soft);font-size:12.5px;text-align:center;padding:14px 0 0;opacity:.6;text-decoration:underline;text-underline-offset:3px;}
+  .link-discreto:active{opacity:1;}
   .cartao-opcao .emoji{font-size:26px;width:44px;height:44px;border-radius:12px;background:var(--bg);
     display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .cartao-opcao .txt{flex:1;text-align:left;}
@@ -126,19 +128,24 @@
     align-items:center;justify-content:center;font-size:13px;color:var(--ink);}
 
   /* ---------- Card grande de opção (funcionário) — foto em cima, brilho ---------- */
+  @keyframes entradaCard{ from{opacity:0;transform:translateY(14px) scale(.97);} to{opacity:1;transform:translateY(0) scale(1);} }
+  @keyframes pulsoBrilho{ 0%,100%{box-shadow:0 0 0 1px rgba(201,168,76,.3), 0 6px 20px rgba(201,168,76,.12);} 50%{box-shadow:0 0 0 1px rgba(201,168,76,.5), 0 8px 26px rgba(201,168,76,.22);} }
+  @keyframes checkPop{ 0%{transform:scale(0) rotate(-20deg);} 60%{transform:scale(1.25) rotate(6deg);} 100%{transform:scale(1) rotate(0);} }
   .opcao-card{background:var(--paper);border-radius:var(--radius-card);margin-bottom:14px;overflow:hidden;
     box-shadow:0 0 0 1px rgba(201,168,76,.3), 0 6px 20px rgba(201,168,76,.12);
-    transition:box-shadow .15s, transform .1s; position:relative;}
-  .opcao-card:active{transform:scale(.985);}
-  .opcao-card.selecionada{box-shadow:0 0 0 2px var(--amber), 0 0 28px rgba(201,168,76,.6);}
-  .opcao-card.esgotada{opacity:.4;pointer-events:none;}
+    transition:box-shadow .2s, transform .15s cubic-bezier(.34,1.56,.64,1); position:relative;
+    animation:entradaCard .4s cubic-bezier(.2,.8,.2,1) backwards, pulsoBrilho 3.2s ease-in-out infinite;}
+  .opcao-card:active{transform:scale(.96);}
+  .opcao-card.selecionada{box-shadow:0 0 0 2px var(--amber), 0 0 28px rgba(201,168,76,.6);
+    animation:entradaCard .4s cubic-bezier(.2,.8,.2,1) backwards;transform:scale(1.015);}
+  .opcao-card.esgotada{opacity:.4;pointer-events:none;animation:entradaCard .4s cubic-bezier(.2,.8,.2,1) backwards;}
   .opcao-card .foto-grande{width:100%;height:140px;background:var(--bg);
     display:flex;align-items:center;justify-content:center;font-size:38px;color:var(--ink-soft);position:relative;overflow:hidden;}
   .opcao-card .foto-grande img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
   .opcao-card .check-selo{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;
     background:var(--amber);color:#1A0A0A;display:none;align-items:center;justify-content:center;font-size:16px;font-weight:900;
     box-shadow:0 2px 8px rgba(0,0,0,.4);}
-  .opcao-card.selecionada .check-selo{display:flex;}
+  .opcao-card.selecionada .check-selo{display:flex;animation:checkPop .35s cubic-bezier(.34,1.56,.64,1);}
   .opcao-card .texto{padding:12px 14px 14px;}
   .opcao-card .texto .nome{font-size:16px;margin:0 0 4px;}
   .opcao-card .texto .desc{font-size:13px;color:var(--ink-soft);line-height:1.5;margin:0;}
@@ -239,6 +246,26 @@
   .rodape-dev{text-align:center;font-size:11px;color:var(--ink-soft);opacity:.6;padding:20px 0 0;}
   .vazio{text-align:center;padding:40px 20px;color:var(--ink-soft);}
   .vazio .em{font-size:32px;display:block;margin-bottom:8px;}
+  .carrossel-semana{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:0;
+    height:calc(100vh - 180px);align-items:center;-webkit-overflow-scrolling:touch;perspective:1000px;}
+  .carrossel-semana::-webkit-scrollbar{display:none;}
+  .dia-card{scroll-snap-align:center;flex:0 0 82vw;max-width:420px;margin:0 3vw;
+    background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:20px;
+    box-shadow:var(--shadow);transition:transform .1s;will-change:transform;max-height:92%;overflow-y:auto;}
+  .dia-card .dia-titulo{font-family:'Playfair Display';font-size:20px;color:var(--amber);margin:0 0 2px;}
+  .dia-card .dia-sub{font-size:12px;color:var(--ink-soft);margin:0 0 16px;}
+  .dia-card .dia-cat{margin-bottom:14px;}
+  .dia-card .dia-cat-nome{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:6px;}
+  .dia-card .dia-item{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13.5px;}
+  .dia-card .dia-item .miniatura{width:34px;height:34px;border-radius:8px;background:var(--bg);flex-shrink:0;
+    position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .dia-card .dia-item .miniatura img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+
+  .config-secao{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:16px;}
+  .config-secao-titulo{display:flex;align-items:center;gap:8px;font-family:'Playfair Display';font-size:15px;color:var(--amber);margin:0 0 12px;}
+  .config-secao .rotulo:first-child{margin-top:0;}
+  .config-secao .linha-config:last-child{border-bottom:none;}
+
   .toast{position:fixed;top:calc(16px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:var(--pine);color:#fff;
     padding:12px 20px;border-radius:100px;font-size:13.5px;font-weight:700;z-index:100;box-shadow:var(--shadow);
     max-width:88vw;text-align:center;}
@@ -258,18 +285,10 @@
     <div class="marca">
       <img src="IMG_1616.png" alt="Marchesini di Roverbella" class="logo-marca" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27200%27 height=%27200%27%3E%3Ccircle cx=%27100%27 cy=%27100%27 r=%2795%27 fill=%27%236B1A1A%27 stroke=%27%23C9A84C%27 stroke-width=%276%27/%3E%3Ctext x=%2750%25%27 y=%2762%25%27 font-size=%2790%27 text-anchor=%27middle%27%3E%F0%9F%8D%BD%3C/text%3E%3C/svg%3E'">
       <h1>Refeitório do Dia</h1>
-      <p>Escolha como deseja entrar</p>
+      <p>Monte seu prato de hoje</p>
     </div>
-    <button class="cartao-opcao" onclick="abrirLoginGerente()">
-      <div class="emoji">👨‍🍳</div>
-      <div class="txt"><b>Sou Gerente</b><span>Cardápio, configurações e relatórios</span></div>
-      <div class="seta">›</div>
-    </button>
-    <button class="cartao-opcao" onclick="irParaFuncionario()">
-      <div class="emoji">🧑‍🏭</div>
-      <div class="txt"><b>Sou Funcionário</b><span>Montar o almoço de hoje</span></div>
-      <div class="seta">›</div>
-    </button>
+    <button class="btn btn-amber btn-bloco" style="padding:20px;font-size:16.5px;" onclick="irParaFuncionario()">🧑‍🏭 Entrar</button>
+    <button class="link-discreto" onclick="abrirLoginGerente()">Área do gerente</button>
   </div>
 
   <div id="tela-login-gerente" class="tela-centro hide">
@@ -345,13 +364,23 @@
     <div class="conteudo hide" id="painel-config"></div>
   </div>
 
-  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto · v2026.07.20-2</div>
+  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto · v2026.07.23-3</div>
 </div>
 
 <div id="banner-instalar" class="hide">
   <div class="txt"><b>Instale o app</b>Acesso rápido, direto da tela inicial.</div>
   <button onclick="instalarPWA()">Instalar</button>
   <button class="fechar" onclick="fecharBannerInstalar()">✕</button>
+</div>
+
+<div id="tela-cardapio-semana" class="hide" style="position:fixed;inset:0;background:var(--bg);z-index:60;overflow:hidden;">
+  <div class="topbar" style="border-bottom:1px solid var(--line);">
+    <div class="esquerda"><div class="titulo">🗓️ Cardápio da semana</div></div>
+    <button class="icon-btn" onclick="fecharCardapioSemana()">✕</button>
+  </div>
+  <div id="chips-turno-semana" style="padding:14px 20px 0;"></div>
+  <div id="carrossel-semana" class="carrossel-semana"></div>
+  <p style="text-align:center;font-size:11.5px;color:var(--ink-soft);padding:6px 20px 20px;">Deslize pros lados pra ver os outros dias · isso é só uma prévia, não é pedido</p>
 </div>
 
 <div id="raiz-modal"></div>
@@ -454,6 +483,7 @@ const CONFIG_PADRAO = {
   ],
   planejamentoProducao: false,
   padroesSemana: false,
+  permitirVerSemana: true,
   notificacoesPublicacao: false,
   iaAtivada: false,
   iaApiKey: "",
@@ -752,12 +782,133 @@ async function salvarFuncionarioNaEquipe(dados){
   await setDoc(doc(db, PREFIXO+"funcionarios", idDispositivoFuncionario()), { ...dados, atualizadoEm: serverTimestamp() }, { merge:true });
 }
 window.abrirMenuFuncionario = () => {
+  const raiz = document.getElementById('raiz-modal');
+  raiz.innerHTML = `
+    <div class="overlay" onclick="if(event.target===this) fecharModal()">
+      <div class="modal">
+        <div class="modal-titulo"><h3>Olá, ${(FUNCIONARIO?.nome||'').split(' ')[0]}</h3><button class="icon-btn" onclick="fecharModal()">✕</button></div>
+        ${CONFIG.permitirVerSemana ? `<button class="cartao-opcao btn-bloco" style="margin-bottom:10px;" onclick="fecharModal();abrirCardapioSemana();">
+          <div class="emoji">🗓️</div>
+          <div class="txt"><b>Cardápio da semana</b><span>Veja o que vem em cada dia</span></div>
+          <div class="seta">›</div>
+        </button>` : ''}
+        <button class="cartao-opcao btn-bloco" onclick="trocarDeFuncionario()">
+          <div class="emoji">🔄</div>
+          <div class="txt"><b>Trocar de funcionário</b><span>Sair desse perfil</span></div>
+          <div class="seta">›</div>
+        </button>
+      </div>
+    </div>`;
+};
+window.trocarDeFuncionario = () => {
   if(confirm('Trocar de funcionário / sair deste perfil?')){
     localStorage.removeItem('refeitorio_funcionario'); FUNCIONARIO = null;
     desassinarCardapio();
+    fecharModal();
     mostrarTela('tela-perfil');
   }
 };
+
+/* ============================================================
+   CARDÁPIO DA SEMANA (preview em carrossel, a partir dos padrões salvos)
+   ============================================================ */
+let TURNO_SEMANA_ATIVO = null;
+window.abrirCardapioSemana = async () => {
+  document.getElementById('tela-cardapio-semana').classList.remove('hide');
+  const ativos = turnosAtivos();
+  TURNO_SEMANA_ATIVO = (turnoAtual() || ativos[0] || {}).id || null;
+  renderizarChipsTurnoSemana();
+  await renderizarCarrosselSemana();
+};
+window.fecharCardapioSemana = () => {
+  document.getElementById('tela-cardapio-semana').classList.add('hide');
+};
+function renderizarChipsTurnoSemana(){
+  const box = document.getElementById('chips-turno-semana');
+  const ativos = turnosAtivos();
+  if(ativos.length<=1){ box.innerHTML=''; return; }
+  box.innerHTML = `<div class="chip-select">
+    ${ativos.map(t=>`<button type="button" class="chip ${TURNO_SEMANA_ATIVO===t.id?'ativo':''}" onclick="trocarTurnoSemana('${t.id}')">${t.nome}</button>`).join('')}
+  </div>`;
+}
+window.trocarTurnoSemana = async (turnoId) => {
+  TURNO_SEMANA_ATIVO = turnoId;
+  renderizarChipsTurnoSemana();
+  await renderizarCarrosselSemana();
+};
+
+async function renderizarCarrosselSemana(){
+  const container = document.getElementById('carrossel-semana');
+  container.innerHTML = `<p style="color:var(--ink-soft);font-size:13px;padding:0 20px;">Carregando…</p>`;
+  if(!TURNO_SEMANA_ATIVO){ container.innerHTML = `<p style="color:var(--ink-soft);font-size:13px;padding:0 20px;">Nenhum turno ativo.</p>`; return; }
+
+  const hojeIndex = new Date().getDay();
+  const cartoes = await Promise.all(NOMES_DIA_SEMANA.map(async (nomeDia, diaIndex) => {
+    const id = idPadraoSemana(TURNO_SEMANA_ATIVO, diaIndex);
+    const snap = await getDoc(doc(db, PREFIXO+"padroes_semana", id));
+    const categorias = snap.exists() ? (snap.data().categorias || {}) : null;
+    return { nomeDia, diaIndex, categorias };
+  }));
+
+  container.innerHTML = cartoes.map(c => {
+    const ehHoje = c.diaIndex === hojeIndex;
+    if(!c.categorias || Object.keys(c.categorias).length===0){
+      return `<div class="dia-card">
+        <p class="dia-titulo">${c.nomeDia}</p>
+        <p class="dia-sub">${ehHoje ? 'Hoje' : ''}</p>
+        <div class="vazio" style="padding:30px 10px;"><span class="em">🍽️</span>Nenhum padrão salvo pra esse dia ainda.</div>
+      </div>`;
+    }
+    const secoes = categoriasAtivas().map(cat=>{
+      const itens = c.categorias[cat.id] || [];
+      if(itens.length===0) return '';
+      return `<div class="dia-cat">
+        <div class="dia-cat-nome">${cat.nome}</div>
+        ${itens.map(p=>`<div class="dia-item">
+          <div class="miniatura">🍽️${p.foto?`<img src="${p.foto}" onerror="this.remove()">`:''}</div>
+          <span>${p.nome}</span>
+        </div>`).join('')}
+      </div>`;
+    }).join('');
+    return `<div class="dia-card">
+      <p class="dia-titulo">${c.nomeDia}</p>
+      <p class="dia-sub">${ehHoje ? 'Hoje' : ''}</p>
+      ${secoes || '<p style="font-size:12.5px;color:var(--ink-soft);">Sem itens cadastrados.</p>'}
+    </div>`;
+  }).join('');
+
+  // efeito 3D coverflow ao rolar
+  ativarEfeito3DCarrossel(container);
+
+  // já centraliza no dia de hoje
+  requestAnimationFrame(()=>{
+    const cardHoje = container.children[hojeIndex];
+    if(cardHoje) cardHoje.scrollIntoView({ inline:'center', behavior:'auto' });
+  });
+}
+
+function ativarEfeito3DCarrossel(container){
+  let ticking = false;
+  function atualizar(){
+    const centro = container.scrollLeft + container.clientWidth/2;
+    Array.from(container.children).forEach(card=>{
+      const centroCard = card.offsetLeft + card.offsetWidth/2;
+      const dist = (centroCard - centro) / container.clientWidth;
+      const distClamp = Math.max(-1, Math.min(1, dist));
+      const escala = 1 - Math.abs(distClamp)*0.14;
+      const rotacao = distClamp * -18;
+      const opacidade = 1 - Math.abs(distClamp)*0.45;
+      card.style.transform = `perspective(1000px) rotateY(${rotacao}deg) scale(${escala})`;
+      card.style.opacity = opacidade;
+    });
+    ticking = false;
+  }
+  container.addEventListener('scroll', ()=>{
+    if(!ticking){ requestAnimationFrame(atualizar); ticking = true; }
+  });
+  atualizar();
+}
+
 function renderizarSaudacao(){
   const primeiroNome = (FUNCIONARIO?.nome || '').split(' ')[0];
   document.getElementById('saudacao-funcionario').textContent = `Olá, ${primeiroNome || 'tudo bem'}!`;
@@ -1027,19 +1178,25 @@ window.confirmarOpcao = async (indiceEdicao, ehCoringa) => {
 
   let fotoUrl = editando ? ((ehCoringa ? CONFIG.coringas[catId][indiceEdicao] : CARDAPIO_CATEGORIAS[catId][indiceEdicao]).foto || "") : "";
   const statusEl = document.getElementById('np-foto-status');
-  if(statusEl) statusEl.textContent = '';
+  if(statusEl){ statusEl.textContent = ''; statusEl.style.color = 'var(--ink-soft)'; }
+  function logFoto(msg){ if(statusEl) statusEl.innerHTML += (statusEl.innerHTML?'<br>':'') + msg; }
+
   if(fotoInput.files[0]){
     try{
+      const arquivo = fotoInput.files[0];
+      logFoto(`Arquivo: ${arquivo.name} (${arquivo.type || 'sem tipo'}, ${(arquivo.size/1024).toFixed(0)}KB)`);
       toast('Enviando foto…');
-      const caminho = `${hojeISO()}/${Date.now()}_${nomeArquivoSeguro(fotoInput.files[0].name)}`;
-      fotoUrl = await uploadFotoSupabase(fotoInput.files[0], caminho);
+      const caminho = `${hojeISO()}/${Date.now()}_${nomeArquivoSeguro(arquivo.name)}`;
+      logFoto(`Enviando pra: ${caminho}`);
+      fotoUrl = await uploadFotoSupabase(arquivo, caminho);
+      logFoto(`<span style="color:#8fd19e;">✅ Upload e verificação OK</span>`);
+      logFoto(`URL final: <span style="word-break:break-all;">${fotoUrl}</span>`);
       console.log('Foto enviada com sucesso:', fotoUrl);
     }catch(e){
       console.error('Erro no upload da foto:', e);
-      if(statusEl){
-        statusEl.style.color = 'var(--tomato)';
-        statusEl.textContent = '⚠️ Não consegui enviar a foto: ' + e.message + ' — toque em "Adicionar" de novo pra tentar mais uma vez, ou salve sem foto.';
-      }
+      if(statusEl) statusEl.style.color = 'var(--tomato)';
+      logFoto(`⚠️ Não consegui enviar a foto: ${e.message}`);
+      logFoto('Toque em "Adicionar" de novo pra tentar mais uma vez.');
       return; // não salva ainda — deixa o gerente ver o erro e decidir
     }
   }
@@ -1315,10 +1472,10 @@ function renderizarAreaFuncionario(){
         <h3>${cat.instrucao || tituloEscolha}</h3>
       </div>
       <div class="grade-opcoes col-${cat.colunas||1}">
-      ${itens.map(p => {
+      ${itens.map((p, idxItem) => {
         const selecionado = (SELECOES[cat.id]||[]).includes(p.nome);
         return `
-        <div class="opcao-card ${selecionado?'selecionada':''} ${p.esgotado?'esgotada':''}" onclick="${p.esgotado?'':`selecionarOpcao('${cat.id}','${p.nome.replace(/'/g,"\\'")}')`}">
+        <div class="opcao-card ${selecionado?'selecionada':''} ${p.esgotado?'esgotada':''}" style="animation-delay:${Math.min(idxItem*70,420)}ms, 0s;" onclick="${p.esgotado?'':`selecionarOpcao('${cat.id}','${p.nome.replace(/'/g,"\\'")}')`}">
           <div class="foto-grande">🍽️${p.foto ? `<img src="${p.foto}" onerror="this.remove()">` : ''}<div class="check-selo">✓</div></div>
           <div class="texto">
             <p class="nome serif">${p.nome}</p>
@@ -1629,7 +1786,8 @@ async function renderizarEquipe(){
 function renderizarConfig(){
   const box = document.getElementById('painel-config');
   box.innerHTML = `
-    <label class="rotulo">Categorias do prato</label>
+    <div class="config-secao">
+    <div class="config-secao-titulo">🍽️ Categorias do prato</div>
     <div id="lista-categorias">
       ${CONFIG.categorias.map((cat,i)=>`
         <div class="categoria-config-item">
@@ -1670,8 +1828,11 @@ function renderizarConfig(){
         </div>`).join('')}
     </div>
     <button class="btn btn-fantasma btn-bloco" onclick="adicionarCategoria()">+ Adicionar categoria</button>
+    </div>
 
-    <label class="rotulo" style="margin-top:22px;">Como identificar o funcionário</label>
+    <div class="config-secao">
+    <div class="config-secao-titulo">👤 Identificação e pagamento</div>
+    <label class="rotulo">Como identificar o funcionário</label>
     <div class="chip-select">
       ${[{v:'nome_empresa',l:'Nome + empresa'},{v:'matricula',l:'Nome + matrícula'},{v:'telefone',l:'Telefone (WhatsApp)'}]
         .map(o=>`<button type="button" class="chip ${CONFIG.identificacao===o.v?'ativo':''}" onclick="setIdentificacao('${o.v}')">${o.l}</button>`).join('')}
@@ -1681,6 +1842,12 @@ function renderizarConfig(){
       ${[{v:'fatura_empresa',l:'Fatura mensal p/ empresa'},{v:'pix_dinheiro',l:'PIX / dinheiro no balcão'},{v:'vr_va',l:'Vale-refeição (VR/VA)'}]
         .map(o=>`<button type="button" class="chip ${CONFIG.pagamentos.includes(o.v)?'ativo':''}" onclick="alternarPagamento('${o.v}')">${o.l}</button>`).join('')}
     </div>
+    <div class="linha-config" style="margin-top:6px;"><div class="txt"><b>Foto do funcionário</b><span>Pede foto no primeiro acesso</span></div>
+      <div class="switch ${CONFIG.fotoFuncionario?'on':''}" onclick="alternarConfig('fotoFuncionario')"><div class="bolinha"></div></div></div>
+    </div>
+
+    <div class="config-secao">
+    <div class="config-secao-titulo">⚙️ Comportamento do pedido</div>
     <div class="linha-config"><div class="txt"><b>Confirmar presença</b><span>Funcionário confirma que vai almoçar</span></div>
       <div class="switch ${CONFIG.confirmarPresenca?'on':''}" onclick="alternarConfig('confirmarPresenca')"><div class="bolinha"></div></div></div>
     <div class="linha-config"><div class="txt"><b>Avaliação pós-almoço</b><span>Carinhas de satisfação</span></div>
@@ -1693,7 +1860,14 @@ function renderizarConfig(){
       <div class="switch ${CONFIG.planejamentoProducao?'on':''}" onclick="alternarConfig('planejamentoProducao')"><div class="bolinha"></div></div></div>
     <div class="linha-config"><div class="txt"><b>Cardápio padrão por dia da semana</b><span>Salva e restaura um cardápio fixo pra cada dia (ex: toda segunda)</span></div>
       <div class="switch ${CONFIG.padroesSemana?'on':''}" onclick="alternarConfig('padroesSemana')"><div class="bolinha"></div></div></div>
-    <label class="rotulo" style="margin-top:22px;">Turnos de refeição</label>
+    <div class="linha-config"><div class="txt"><b>Funcionário pode ver a semana</b><span>Mostra o menu "Cardápio da semana" pro funcionário logado</span></div>
+      <div class="switch ${CONFIG.permitirVerSemana?'on':''}" onclick="alternarConfig('permitirVerSemana')"><div class="bolinha"></div></div></div>
+    <div class="linha-config"><div class="txt"><b>Notificar cardápio publicado</b><span>Precisa do app aberto</span></div>
+      <div class="switch ${CONFIG.notificacoesPublicacao?'on':''}" onclick="alternarNotificacoes()"><div class="bolinha"></div></div></div>
+    </div>
+
+    <div class="config-secao">
+    <div class="config-secao-titulo">🗓️ Turnos de refeição</div>
     <div id="lista-turnos">
       ${CONFIG.turnos.map((t,i)=>`
         <div class="categoria-config-item">
@@ -1707,9 +1881,10 @@ function renderizarConfig(){
           </div>` : ''}
         </div>`).join('')}
     </div>
+    </div>
 
-    <div class="linha-config"><div class="txt"><b>Notificar cardápio publicado</b><span>Precisa do app aberto</span></div>
-      <div class="switch ${CONFIG.notificacoesPublicacao?'on':''}" onclick="alternarNotificacoes()"><div class="bolinha"></div></div></div>
+    <div class="config-secao">
+    <div class="config-secao-titulo">🪄 Inteligência artificial</div>
     <div class="linha-config"><div class="txt"><b>Cadastro por foto (IA)</b><span>Preenche a partir da foto</span></div>
       <div class="switch ${CONFIG.iaAtivada?'on':''}" onclick="alternarConfig('iaAtivada')"><div class="bolinha"></div></div></div>
     ${CONFIG.iaAtivada ? `<label class="rotulo">Chave da API (Anthropic)</label>
@@ -1721,21 +1896,29 @@ function renderizarConfig(){
         <button type="button" class="chip ${CONFIG.iaCampos.alergenos?'ativo':''}" onclick="alternarCampoIA('alergenos')">Alérgenos</button>
         <button type="button" class="chip ${CONFIG.iaCampos.porcaoSugerida?'ativo':''}" onclick="alternarCampoIA('porcaoSugerida')">Porção sugerida</button>
       </div>` : ''}
-    <div class="linha-config" style="margin-top:10px;"><div class="txt"><b>Foto do funcionário</b><span>Pede foto no primeiro acesso</span></div>
-      <div class="switch ${CONFIG.fotoFuncionario?'on':''}" onclick="alternarConfig('fotoFuncionario')"><div class="bolinha"></div></div></div>
-    <label class="rotulo" style="margin-top:22px;">Diagnóstico</label>
-    <button class="btn btn-fantasma btn-bloco" onclick="testarSupabase()">🔧 Testar conexão com o Supabase</button>
-    <div id="resultado-teste-supabase"></div>
+    </div>
 
-    <label class="rotulo" style="margin-top:22px;">Senha de acesso do gerente</label>
+    <div class="config-secao">
+    <div class="config-secao-titulo">🔧 Diagnóstico</div>
+    <button class="btn btn-fantasma btn-bloco" onclick="testarSupabase()">Testar conexão com o Supabase</button>
+    <div id="resultado-teste-supabase"></div>
+    </div>
+
+    <div class="config-secao">
+    <div class="config-secao-titulo">🔒 Acesso do gerente</div>
+    <label class="rotulo">Senha de acesso</label>
     <input class="campo" id="cfg-senha" type="text" value="${CONFIG.senhaGerente}" onchange="salvarSenha()">
-    <label class="rotulo" style="margin-top:22px;">Empresas atendidas</label>
+    </div>
+
+    <div class="config-secao">
+    <div class="config-secao-titulo">🏢 Empresas atendidas</div>
     <div id="lista-empresas">
       ${CONFIG.empresas.map((e,i)=>`
         <div class="prato-card" style="align-items:center;"><div class="prato-info"><p class="nome" style="font-size:14.5px;">${e.nome}</p></div>
           <button class="mini-btn" onclick="removerEmpresa(${i})">🗑️</button></div>`).join('')}
     </div>
     <button class="btn btn-fantasma btn-bloco" onclick="adicionarEmpresa()">+ Adicionar empresa</button>
+    </div>
   `;
 }
 window.renomearCategoria = async (i, valor) => { CONFIG.categorias[i].nome = valor.trim() || CONFIG.categorias[i].nome; await salvarConfig(); };
