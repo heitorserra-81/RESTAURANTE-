@@ -364,7 +364,7 @@
     <div class="conteudo hide" id="painel-config"></div>
   </div>
 
-  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto · v2026.07.23-3</div>
+  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto · v2026.07.24-1</div>
 </div>
 
 <div id="banner-instalar" class="hide">
@@ -1008,10 +1008,11 @@ function renderizarCardOpcaoGerente(catId, p, i, ehCoringa){
   return `
     <div class="prato-card" data-cat="${catId}" data-idx="${i}" data-coringa="${ehCoringa}">
       <span class="handle-arrastar" data-cat="${catId}" data-idx="${i}" data-coringa="${ehCoringa}">⠿</span>
-      <div class="prato-foto">🍲${p.foto ? `<img src="${p.foto}" onerror="this.remove()">` : ''}</div>
+      <div class="prato-foto">🍲${p.foto ? `<img src="${p.foto}" onerror="this.remove();this.parentElement.nextElementSibling.querySelector('.erro-foto-card').style.display='block';">` : ''}</div>
       <div class="prato-info">
         <p class="nome">${p.nome}</p>
         <p class="desc">${p.descricao || ''}</p>
+        ${p.foto ? `<p class="erro-foto-card" style="display:none;font-size:10px;color:var(--tomato);word-break:break-all;margin:4px 0 0;">⚠️ Não carregou: ${p.foto}</p>` : ''}
         <div class="prato-tags">
           ${ehCoringa ? `<span class="tagzinha coringa">🔁 sempre disponível</span>` : ''}
           ${p.vegetariano ? `<span class="tagzinha">🌱 Vegetariano</span>` : ''}
@@ -1476,7 +1477,8 @@ function renderizarAreaFuncionario(){
         const selecionado = (SELECOES[cat.id]||[]).includes(p.nome);
         return `
         <div class="opcao-card ${selecionado?'selecionada':''} ${p.esgotado?'esgotada':''}" style="animation-delay:${Math.min(idxItem*70,420)}ms, 0s;" onclick="${p.esgotado?'':`selecionarOpcao('${cat.id}','${p.nome.replace(/'/g,"\\'")}')`}">
-          <div class="foto-grande">🍽️${p.foto ? `<img src="${p.foto}" onerror="this.remove()">` : ''}<div class="check-selo">✓</div></div>
+          <div class="foto-grande">🍽️${p.foto ? `<img src="${p.foto}" onerror="this.remove();this.parentElement.nextElementSibling.style.display='flex';">` : ''}<div class="check-selo">✓</div></div>
+          ${p.foto ? `<div style="display:none;position:absolute;top:8px;left:8px;right:8px;background:rgba(0,0,0,.85);border-radius:8px;padding:6px 8px;font-size:9.5px;color:#FF8A8A;word-break:break-all;z-index:5;">⚠️ ${p.foto}</div>` : ''}
           <div class="texto">
             <p class="nome serif">${p.nome}</p>
             <p class="desc">${p.descricao || ''}</p>
