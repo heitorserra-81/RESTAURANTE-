@@ -364,7 +364,7 @@
     <div class="conteudo hide" id="painel-config"></div>
   </div>
 
-  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto · v2026.07.25-1</div>
+  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto · v2026.07.25-2</div>
 </div>
 
 <div id="banner-instalar" class="hide">
@@ -659,10 +659,16 @@ window.validarSenhaGerente = () => {
 window.sairGerente = () => { desassinarCardapio(); mostrarTela('tela-perfil'); };
 
 function entrarNoTurnoFuncionario(){
-  checarPedidoLocal();
-  const turno = turnoAtual();
-  if(turno){ assinarCardapioTurno(turno.id); }
-  else { desassinarCardapio(); CARDAPIO_CATEGORIAS = {}; renderizarAreaFuncionario(); }
+  try{
+    checarPedidoLocal();
+    const turno = turnoAtual();
+    if(turno){ assinarCardapioTurno(turno.id); }
+    else { desassinarCardapio(); CARDAPIO_CATEGORIAS = {}; renderizarAreaFuncionario(); }
+  }catch(e){
+    console.error('Erro ao entrar no turno do funcionário:', e);
+    const box = document.getElementById('area-funcionario');
+    if(box) box.innerHTML = `<div class="vazio"><span class="em">⚠️</span>Deu um erro ao carregar o cardápio.<br><span style="font-size:11px;">${e.message}</span></div>`;
+  }
 }
 function verificarTrocaDeTurnoFuncionario(){
   if(document.getElementById('tela-funcionario').classList.contains('hide')) return;
@@ -1660,8 +1666,18 @@ function checarPedidoLocal(){
   PEDIDO_ATUAL = null;
   const turno = turnoAtual();
   if(!turno) return;
-  const salvo = localStorage.getItem(`refeitorio_pedido_${hojeISO()}_${turno.id}`);
-  if(salvo) PEDIDO_ATUAL = JSON.parse(salvo);
+  const chave = `refeitorio_pedido_${hojeISO()}_${turno.id}`;
+  const salvo = localStorage.getItem(chave);
+  if(salvo){
+    try{
+      const dados = JSON.parse(salvo);
+      if(dados && typeof dados === 'object' && dados.escolhas) PEDIDO_ATUAL = dados;
+      else localStorage.removeItem(chave); // formato antigo/incompleto — descarta
+    }catch(e){
+      console.error('Pedido local corrompido, descartando:', e);
+      localStorage.removeItem(chave);
+    }
+  }
 }
 // checarPedidoLocal() é chamada em entrarNoTurnoFuncionario(), depois que CONFIG carrega
 /* ============================================================
