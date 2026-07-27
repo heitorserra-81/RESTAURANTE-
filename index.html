@@ -364,7 +364,7 @@
     <div class="conteudo hide" id="painel-config"></div>
   </div>
 
-  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto · v2026.07.25-2</div>
+  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto · v2026.07.26-1</div>
 </div>
 
 <div id="banner-instalar" class="hide">
@@ -615,9 +615,14 @@ async function iniciar(){
     setTimeout(()=>{
       document.getElementById('tela-splash').classList.add('hide');
       document.getElementById('app').classList.remove('hide');
-      const salvo = localStorage.getItem('refeitorio_funcionario');
-      if(salvo){
-        FUNCIONARIO = JSON.parse(salvo);
+      let dadosValidos = null;
+      try{
+        const salvo = localStorage.getItem('refeitorio_funcionario');
+        if(salvo){ const p = JSON.parse(salvo); if(p && typeof p === 'object' && p.nome) dadosValidos = p; }
+      }catch(e){ console.error('Dado de funcionário corrompido no início:', e); }
+      if(!dadosValidos) localStorage.removeItem('refeitorio_funcionario');
+      if(dadosValidos){
+        FUNCIONARIO = dadosValidos;
         mostrarTela('tela-funcionario');
         renderizarSaudacao();
         entrarNoTurnoFuncionario();
@@ -678,12 +683,23 @@ function verificarTrocaDeTurnoFuncionario(){
 }
 
 window.irParaFuncionario = async () => {
-  const salvo = localStorage.getItem('refeitorio_funcionario');
-  if(salvo){ FUNCIONARIO = JSON.parse(salvo); mostrarTela('tela-funcionario'); renderizarSaudacao(); entrarNoTurnoFuncionario(); }
-  else {
-    await carregarCacheFuncionarios();
-    montarCamposIdentificacao();
-    mostrarTela('tela-identificacao');
+  try{
+    const salvo = localStorage.getItem('refeitorio_funcionario');
+    let dadosValidos = null;
+    if(salvo){
+      try{ dadosValidos = JSON.parse(salvo); if(!dadosValidos || typeof dadosValidos !== 'object' || !dadosValidos.nome) dadosValidos = null; }
+      catch(e){ dadosValidos = null; }
+      if(!dadosValidos) localStorage.removeItem('refeitorio_funcionario');
+    }
+    if(dadosValidos){ FUNCIONARIO = dadosValidos; mostrarTela('tela-funcionario'); renderizarSaudacao(); entrarNoTurnoFuncionario(); }
+    else {
+      await carregarCacheFuncionarios();
+      montarCamposIdentificacao();
+      mostrarTela('tela-identificacao');
+    }
+  }catch(e){
+    console.error('Erro ao entrar como funcionário:', e);
+    toast('Erro ao entrar: ' + e.message);
   }
 };
 
@@ -704,10 +720,11 @@ function montarCamposIdentificacao(){
   let html = `<label class="rotulo">Seu nome</label>
     <input class="campo" id="id-nome" placeholder="Nome completo" autocomplete="off" oninput="buscarFuncionarioPorNome(this.value)">
     <div id="sugestoes-funcionario"></div>
-    <div id="foto-reconhecida" class="hide" style="display:flex;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--amber);border-radius:12px;padding:10px 12px;margin:-2px 0 10px;">
-      <img id="foto-reconhecida-img" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">
-      <div style="flex:1;font-size:12.5px;color:var(--ink-soft);">É você? <b style="color:var(--ink);" id="foto-reconhecida-nome"></b></div>
-      <button type="button" class="mini-btn" onclick="limparReconhecimento()">✕</button>
+    <div id="foto-reconhecida" class="hide" style="display:flex;flex-direction:column;align-items:center;text-align:center;background:var(--paper);border:2px solid var(--amber);border-radius:18px;padding:20px 16px;margin:4px 0 16px;position:relative;">
+      <button type="button" onclick="limparReconhecimento()" style="position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;background:var(--bg);color:var(--ink-soft);font-size:14px;">✕</button>
+      <img id="foto-reconhecida-img" style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--amber);box-shadow:0 6px 20px rgba(201,168,76,.3);margin-bottom:10px;">
+      <div style="font-size:13.5px;color:var(--ink-soft);">É você?</div>
+      <b style="color:var(--amber);font-family:'Playfair Display';font-size:19px;" id="foto-reconhecida-nome"></b>
     </div>`;
   if(CONFIG.identificacao === "nome_empresa"){
     html += `<label class="rotulo">Sua empresa</label><select class="campo" id="id-empresa">${CONFIG.empresas.map(e=>`<option value="${e.codigo}">${e.nome}</option>`).join('')}</select>`;
@@ -717,7 +734,7 @@ function montarCamposIdentificacao(){
   } else if(CONFIG.identificacao === "telefone"){
     html += `<label class="rotulo">WhatsApp</label><input class="campo" id="id-telefone" inputmode="numeric" placeholder="(19) 90000-0000">`;
   }
-  if(CONFIG.fotoFuncionario){ html += `<label class="rotulo">Sua foto</label><input type="file" accept="image/*" class="campo" id="id-foto"><p style="font-size:11.5px;color:var(--ink-soft);margin:-6px 0 6px;">Se você já se reconheceu acima, pode deixar em branco — usamos a foto que já temos.</p><p id="id-foto-status" style="font-size:12px;margin:-2px 0 10px;"></p>`; }
+  if(CONFIG.fotoFuncionario){ html += `<label class="rotulo">Sua foto</label><input type="file" accept="image/*" class="campo" id="id-foto" onchange="previsualizarFotoFuncionario(this)"><div id="id-foto-preview"></div><p style="font-size:11.5px;color:var(--ink-soft);margin:-6px 0 6px;">Se você já se reconheceu acima, pode deixar em branco — usamos a foto que já temos.</p><p id="id-foto-status" style="font-size:12px;margin:-2px 0 10px;"></p>`; }
   box.innerHTML = html;
 }
 
@@ -1193,12 +1210,128 @@ window.abrirModalOpcao = (catId, indiceEdicao, ehCoringa) => {
     </div>`;
 };
 window.fecharModal = () => { document.getElementById('raiz-modal').innerHTML = ''; };
+window.previsualizarFotoFuncionario = (input) => {
+  const container = document.getElementById('id-foto-preview');
+  if(!container || !input.files[0]){ return; }
+  const urlLocal = URL.createObjectURL(input.files[0]);
+  container.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin:-4px 0 8px;">
+      <img src="${urlLocal}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;">
+      <button type="button" class="btn btn-fantasma" style="padding:8px 14px;font-size:12.5px;" onclick="abrirRecorteFoto('id-foto')">🔲 Cortar/ajustar</button>
+    </div>`;
+};
 window.previsualizarFoto = (input) => {
   const container = document.getElementById('np-preview-container');
   if(!input.files[0]){ return; }
   const urlLocal = URL.createObjectURL(input.files[0]);
-  container.innerHTML = `<img src="${urlLocal}" style="width:64px;height:64px;border-radius:10px;object-fit:cover;">
+  container.innerHTML = `<div style="display:flex;align-items:center;gap:10px;">
+      <img src="${urlLocal}" style="width:64px;height:64px;border-radius:10px;object-fit:cover;">
+      <button type="button" class="btn btn-fantasma" style="padding:8px 14px;font-size:12.5px;" onclick="abrirRecorteFoto('${input.id}')">🔲 Cortar/ajustar</button>
+    </div>
     <p style="font-size:11px;color:var(--ink-soft);margin:4px 0 0;">Prévia local — só confirma que o arquivo foi lido certo. Ainda precisa salvar pra enviar.</p>`;
+};
+
+/* ============================================================
+   RECORTE / ZOOM DE FOTO (crop simples com arrastar + slider de zoom)
+   ============================================================ */
+let RECORTE_INPUT_ID = null;
+let RECORTE_ESTADO = { escala: 1, x: 0, y: 0, imgW: 0, imgH: 0, arrastando: false, inicioX: 0, inicioY: 0 };
+
+window.abrirRecorteFoto = (inputId) => {
+  const input = document.getElementById(inputId);
+  if(!input.files[0]) return;
+  RECORTE_INPUT_ID = inputId;
+  const urlLocal = URL.createObjectURL(input.files[0]);
+  const raiz = document.getElementById('raiz-modal');
+  raiz.innerHTML = `
+    <div class="overlay">
+      <div class="modal" style="padding:0 0 20px;">
+        <div class="modal-titulo" style="padding:20px 20px 0;"><h3>Ajustar foto</h3><button class="icon-btn" onclick="fecharModal()">✕</button></div>
+        <div id="crop-viewport" style="width:100%;aspect-ratio:1;overflow:hidden;position:relative;background:#000;touch-action:none;margin-top:14px;">
+          <img id="crop-img" src="${urlLocal}" style="position:absolute;left:0;top:0;transform-origin:0 0;user-select:none;-webkit-user-drag:none;">
+          <div style="position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 2px rgba(201,168,76,.6);"></div>
+        </div>
+        <div style="padding:16px 20px 0;">
+          <label class="rotulo">Zoom</label>
+          <input type="range" id="crop-zoom" min="100" max="300" value="100" style="width:100%;" oninput="ajustarZoomRecorte(this.value)">
+          <button class="btn btn-primario btn-bloco" style="margin-top:14px;" onclick="confirmarRecorte()">Usar essa foto</button>
+        </div>
+      </div>
+    </div>`;
+
+  const img = document.getElementById('crop-img');
+  img.onload = () => {
+    const viewport = document.getElementById('crop-viewport');
+    const lado = viewport.clientWidth;
+    const escalaBase = Math.max(lado/img.naturalWidth, lado/img.naturalHeight);
+    RECORTE_ESTADO = { escala: escalaBase, escalaBase, x: (lado - img.naturalWidth*escalaBase)/2, y: (lado - img.naturalHeight*escalaBase)/2, imgW: img.naturalWidth, imgH: img.naturalHeight, arrastando:false };
+    aplicarTransformRecorte();
+    ativarArrastoRecorte(viewport);
+  };
+};
+
+function aplicarTransformRecorte(){
+  const img = document.getElementById('crop-img');
+  if(!img) return;
+  img.style.width = RECORTE_ESTADO.imgW + 'px';
+  img.style.height = RECORTE_ESTADO.imgH + 'px';
+  img.style.transform = `translate(${RECORTE_ESTADO.x}px, ${RECORTE_ESTADO.y}px) scale(${RECORTE_ESTADO.escala/RECORTE_ESTADO.escalaBase})`;
+}
+function clampRecorte(){
+  const viewport = document.getElementById('crop-viewport');
+  const lado = viewport.clientWidth;
+  const largura = RECORTE_ESTADO.imgW * RECORTE_ESTADO.escala;
+  const altura = RECORTE_ESTADO.imgH * RECORTE_ESTADO.escala;
+  RECORTE_ESTADO.x = Math.min(0, Math.max(lado - largura, RECORTE_ESTADO.x));
+  RECORTE_ESTADO.y = Math.min(0, Math.max(lado - altura, RECORTE_ESTADO.y));
+}
+window.ajustarZoomRecorte = (valor) => {
+  const fator = valor/100;
+  RECORTE_ESTADO.escala = RECORTE_ESTADO.escalaBase * fator;
+  clampRecorte();
+  aplicarTransformRecorte();
+};
+function ativarArrastoRecorte(viewport){
+  let inicio = null;
+  viewport.onpointerdown = (e) => {
+    inicio = { x: e.clientX - RECORTE_ESTADO.x, y: e.clientY - RECORTE_ESTADO.y };
+    viewport.setPointerCapture(e.pointerId);
+  };
+  viewport.onpointermove = (e) => {
+    if(!inicio) return;
+    RECORTE_ESTADO.x = e.clientX - inicio.x;
+    RECORTE_ESTADO.y = e.clientY - inicio.y;
+    clampRecorte();
+    aplicarTransformRecorte();
+  };
+  viewport.onpointerup = () => { inicio = null; };
+}
+
+window.confirmarRecorte = async () => {
+  const viewport = document.getElementById('crop-viewport');
+  const lado = viewport.clientWidth;
+  const img = document.getElementById('crop-img');
+  const canvas = document.createElement('canvas');
+  canvas.width = 800; canvas.height = 800;
+  const ctx = canvas.getContext('2d');
+  const fatorCanvas = 800/lado;
+  ctx.drawImage(img,
+    -RECORTE_ESTADO.x/RECORTE_ESTADO.escala, -RECORTE_ESTADO.y/RECORTE_ESTADO.escala,
+    lado/RECORTE_ESTADO.escala, lado/RECORTE_ESTADO.escala,
+    0, 0, 800, 800
+  );
+  canvas.toBlob((blob)=>{
+    if(!blob){ toast('Erro ao cortar a foto'); return; }
+    const arquivoCortado = new File([blob], 'foto-cortada.jpg', { type: 'image/jpeg' });
+    const input = document.getElementById(RECORTE_INPUT_ID);
+    const dt = new DataTransfer();
+    dt.items.add(arquivoCortado);
+    input.files = dt.files;
+    // atualiza a prévia com o resultado cortado
+    if(RECORTE_INPUT_ID === 'np-foto') previsualizarFoto(input);
+    else if(RECORTE_INPUT_ID === 'id-foto') previsualizarFotoFuncionario(input);
+    fecharModal();
+    toast('Foto ajustada!');
+  }, 'image/jpeg', 0.85);
 };
 
 window.confirmarOpcao = async (indiceEdicao, ehCoringa) => {
@@ -1214,27 +1347,21 @@ window.confirmarOpcao = async (indiceEdicao, ehCoringa) => {
   let fotoUrl = editando ? ((ehCoringa ? CONFIG.coringas[catId][indiceEdicao] : CARDAPIO_CATEGORIAS[catId][indiceEdicao]).foto || "") : "";
   const statusEl = document.getElementById('np-foto-status');
   if(statusEl){ statusEl.textContent = ''; statusEl.style.color = 'var(--ink-soft)'; }
-  function logFoto(msg){ if(statusEl) statusEl.innerHTML += (statusEl.innerHTML?'<br>':'') + msg; }
 
   if(fotoInput.files[0]){
     try{
       let arquivo = fotoInput.files[0];
-      logFoto(`Arquivo original: ${arquivo.name} (${arquivo.type || 'sem tipo'}, ${(arquivo.size/1024).toFixed(0)}KB)`);
       toast('Comprimindo foto…');
       arquivo = await comprimirImagem(arquivo);
-      logFoto(`Depois de comprimir: ${(arquivo.size/1024).toFixed(0)}KB`);
       toast('Enviando foto…');
       const caminho = `${hojeISO()}/${Date.now()}_${nomeArquivoSeguro(arquivo.name)}`;
-      logFoto(`Enviando pra: ${caminho}`);
       fotoUrl = await uploadFotoSupabase(arquivo, caminho);
-      logFoto(`<span style="color:#8fd19e;">✅ Upload e verificação OK</span>`);
-      logFoto(`URL final: <span style="word-break:break-all;">${fotoUrl}</span>`);
-      console.log('Foto enviada com sucesso:', fotoUrl);
     }catch(e){
       console.error('Erro no upload da foto:', e);
-      if(statusEl) statusEl.style.color = 'var(--tomato)';
-      logFoto(`⚠️ Não consegui enviar a foto: ${e.message}`);
-      logFoto('Toque em "Adicionar" de novo pra tentar mais uma vez.');
+      if(statusEl){
+        statusEl.style.color = 'var(--tomato)';
+        statusEl.textContent = '⚠️ Não consegui enviar a foto: ' + e.message + ' — toque em "Adicionar" de novo pra tentar mais uma vez.';
+      }
       return; // não salva ainda — deixa o gerente ver o erro e decidir
     }
   }
@@ -1257,23 +1384,11 @@ window.confirmarOpcao = async (indiceEdicao, ehCoringa) => {
     if(!CARDAPIO_CATEGORIAS[catId]) CARDAPIO_CATEGORIAS[catId] = [];
     if(editando) CARDAPIO_CATEGORIAS[catId][indiceEdicao] = dadosOpcao;
     else CARDAPIO_CATEGORIAS[catId].push(dadosOpcao);
-    logFoto(`Antes de salvar: dadosOpcao.foto = "${dadosOpcao.foto || '(vazio)'}"`);
     await salvarCardapioHoje();
-    // lê direto do Firestore pra confirmar se a foto realmente foi salva
-    try{
-      const verifica = await getDoc(doc(db, PREFIXO+"cardapio", `${hojeISO()}_${TURNO_CONTEXTO}`));
-      const itensVerif = verifica.data()?.categorias?.[catId] || [];
-      const idxVerif = editando ? indiceEdicao : itensVerif.length - 1;
-      const fotoNoFirestore = itensVerif[idxVerif]?.foto || '';
-      logFoto(`Depois de ler de volta do Firestore: foto = "${fotoNoFirestore || '(vazio)'}"`);
-      if(dadosOpcao.foto && !fotoNoFirestore){
-        logFoto(`<span style="color:var(--tomato);">⚠️ A foto tinha valor antes de salvar, mas voltou vazia do Firestore! Bug na gravação.</span>`);
-      }
-    }catch(eVerif){ logFoto(`Não consegui verificar no Firestore: ${eVerif.message}`); }
   }
+  fecharModal();
   renderizarCategoriasGerente();
   toast(editando ? 'Atualizado!' : 'Adicionado!');
-  logFoto('<br><b>Pode fechar o modal manualmente (✕) depois de ler isso.</b>');
 };
 
 window.copiarCardapioOntem = async () => {
