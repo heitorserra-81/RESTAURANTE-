@@ -364,7 +364,7 @@
     <div class="conteudo hide" id="painel-config"></div>
   </div>
 
-  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto · v2026.07.26-1</div>
+  <div class="rodape-dev">Desenvolvido por Heitor Serra Neto · v2026.07.27-2</div>
 </div>
 
 <div id="banner-instalar" class="hide">
@@ -510,6 +510,7 @@ const CONFIG_PADRAO = {
   planejamentoProducao: false,
   padroesSemana: false,
   permitirVerSemana: true,
+  cardapioAutomaticoSemana: false,
   notificacoesPublicacao: false,
   iaAtivada: false,
   iaApiKey: "",
@@ -972,21 +973,41 @@ function renderizarSaudacao(){
    CARDÁPIO — TEMPO REAL (por categorias)
    ============================================================ */
 let CARDAPIO_JA_TINHA_ITENS = null;
+let JA_TENTOU_AUTO_PADRAO = null; // evita tentar de novo no mesmo dia/turno
 function assinarCardapioTurno(turnoId){
   if(UNSUB_CARDAPIO){ UNSUB_CARDAPIO(); UNSUB_CARDAPIO = null; }
   TURNO_CONTEXTO = turnoId;
   CARDAPIO_JA_TINHA_ITENS = null;
+  JA_TENTOU_AUTO_PADRAO = null;
   const docId = `${hojeISO()}_${turnoId}`;
   const ref = doc(db, PREFIXO+"cardapio", docId);
-  UNSUB_CARDAPIO = onSnapshot(ref, (snap)=>{
+  UNSUB_CARDAPIO = onSnapshot(ref, async (snap)=>{
     CARDAPIO_CATEGORIAS = snap.exists() ? (snap.data().categorias || {}) : {};
+    const totalItens = Object.values(CARDAPIO_CATEGORIAS).reduce((s,arr)=>s+(arr?.length||0),0);
+
+    if(totalItens===0 && CONFIG.cardapioAutomaticoSemana && JA_TENTOU_AUTO_PADRAO !== docId){
+      JA_TENTOU_AUTO_PADRAO = docId; // só tenta uma vez por dia/turno, evita loop
+      const aplicou = await aplicarPadraoAutomaticoSeExistir(turnoId);
+      if(aplicou) return; // o próprio setDoc vai disparar esse onSnapshot de novo, com os itens já dentro
+    }
+
     if(!document.getElementById('tela-gerente').classList.contains('hide')) renderizarCategoriasGerente();
     if(!document.getElementById('tela-funcionario').classList.contains('hide')) renderizarAreaFuncionario();
-    const totalItens = Object.values(CARDAPIO_CATEGORIAS).reduce((s,arr)=>s+(arr?.length||0),0);
     const temItensAgora = totalItens > 0;
     if(CARDAPIO_JA_TINHA_ITENS === false && temItensAgora) notificarCardapioPublicado();
     CARDAPIO_JA_TINHA_ITENS = temItensAgora;
   });
+}
+async function aplicarPadraoAutomaticoSeExistir(turnoId){
+  try{
+    const diaIndex = new Date().getDay();
+    const snapPadrao = await getDoc(doc(db, PREFIXO+"padroes_semana", idPadraoSemana(turnoId, diaIndex)));
+    if(!snapPadrao.exists() || !snapPadrao.data().categorias) return false;
+    const categorias = JSON.parse(JSON.stringify(snapPadrao.data().categorias));
+    Object.keys(categorias).forEach(catId=>{ categorias[catId].forEach(p=>{ p.esgotado = false; }); });
+    await setDoc(doc(db, PREFIXO+"cardapio", `${hojeISO()}_${turnoId}`), { categorias, atualizadoEm: serverTimestamp(), aplicadoAutomaticamente: true }, { merge:true });
+    return true;
+  }catch(e){ console.error('Erro ao aplicar padrão automático:', e); return false; }
 }
 function desassinarCardapio(){
   if(UNSUB_CARDAPIO){ UNSUB_CARDAPIO(); UNSUB_CARDAPIO = null; }
@@ -1204,7 +1225,7 @@ window.abrirModalOpcao = (catId, indiceEdicao, ehCoringa) => {
         ${!editando ? `<div class="linha-config" style="border:none;padding:8px 0;"><div class="txt"><b>🔁 Opção coringa</b><span>Fica sempre disponível, todo dia</span></div>
           <div class="switch" id="np-coringa-switch" onclick="this.classList.toggle('on')"><div class="bolinha"></div></div></div>` : ''}
         <div style="margin-top:18px;">
-          <button class="btn btn-primario btn-bloco" onclick="confirmarOpcao(${editando?indiceEdicao:'null'}, ${!!ehCoringa})">${editando ? 'Salvar alterações' : 'Adicionar'}</button>
+          <button class="btn btn-primario btn-bloco" id="btn-salvar-opcao" onclick="confirmarOpcao(${editando?indiceEdicao:'null'}, ${!!ehCoringa})">${editando ? 'Salvar alterações' : 'Adicionar'}</button>
         </div>
       </div>
     </div>`;
@@ -1335,8 +1356,11 @@ window.confirmarRecorte = async () => {
 };
 
 window.confirmarOpcao = async (indiceEdicao, ehCoringa) => {
+  const btnSalvar = document.getElementById('btn-salvar-opcao');
+  if(btnSalvar?.disabled) return; // já está processando, ignora toque duplo
+  if(btnSalvar){ btnSalvar.disabled = true; btnSalvar.style.opacity = '.6'; }
   const nome = document.getElementById('np-nome').value.trim();
-  if(!nome){ toast('Digite o nome'); return; }
+  if(!nome){ toast('Digite o nome'); if(btnSalvar){ btnSalvar.disabled=false; btnSalvar.style.opacity='1'; } return; }
   const desc = document.getElementById('np-desc').value.trim();
   const fotoInput = document.getElementById('np-foto');
   const qtdInput = document.getElementById('np-qtd');
@@ -1362,6 +1386,7 @@ window.confirmarOpcao = async (indiceEdicao, ehCoringa) => {
         statusEl.style.color = 'var(--tomato)';
         statusEl.textContent = '⚠️ Não consegui enviar a foto: ' + e.message + ' — toque em "Adicionar" de novo pra tentar mais uma vez.';
       }
+      if(btnSalvar){ btnSalvar.disabled = false; btnSalvar.style.opacity = '1'; }
       return; // não salva ainda — deixa o gerente ver o erro e decidir
     }
   }
@@ -1568,7 +1593,7 @@ function mostrarRevisaoQuantidades(objeto){
           const sugestao = dados.maxEscolhas || 1;
           return `<div class="categoria-config-item">
             <div class="linha1"><span style="font-weight:700;">${cat.nome}</span><span style="font-size:12px;color:var(--ink-soft);">${qtdItens} itens identificados</span></div>
-            <div class="qtd-escolhas"><span style="font-size:12.5px;">Pode escolher até</span><input type="number" min="1" max="6" id="rev-max-${catId}" value="${sugestao}"></div>
+            <div class="qtd-escolhas"><span style="font-size:12.5px;">Pode escolher até</span><input type="number" class="campo" style="width:70px;margin:0;" min="1" max="6" id="rev-max-${catId}" value="${sugestao}"></div>
           </div>`;
         }).join('')}
         <button class="btn btn-primario btn-bloco" style="margin-top:14px;" onclick="aplicarCardapioDaRevisao()">Criar cardápio com essas quantidades</button>
@@ -1977,7 +2002,7 @@ function renderizarConfig(){
             <label><input type="checkbox" ${cat.obrigatorio?'checked':''} onchange="alternarCategoriaCampo(${i},'obrigatorio',this.checked)"> Obrigatória</label>
           </div>
           <div class="qtd-escolhas"><span>Pode escolher até</span>
-            <input type="number" min="1" max="6" value="${cat.maxEscolhas||1}" onchange="definirMaxEscolhas(${i}, this.value)">
+            <input type="number" class="campo" style="width:70px;margin:0;" min="1" max="6" value="${cat.maxEscolhas||1}" onchange="definirMaxEscolhas(${i}, this.value)">
             <span>opções</span>
           </div>
           <div class="qtd-escolhas">
@@ -1997,7 +2022,7 @@ function renderizarConfig(){
           ${(cat.unidadeMedida && cat.unidadeMedida!=='porcao') ? `
           <div class="qtd-escolhas">
             <span>Per capita (por pessoa)</span>
-            <input type="number" step="0.01" min="0" style="width:70px;" value="${cat.percapita||1}" onchange="definirPercapita(${i}, this.value)">
+            <input type="number" class="campo" step="0.01" min="0" style="width:70px;margin:0;" value="${cat.percapita||1}" onchange="definirPercapita(${i}, this.value)">
             <span>${unidadeLabel(cat.unidadeMedida)}</span>
           </div>` : ''}
           ` : ''}
@@ -2036,6 +2061,8 @@ function renderizarConfig(){
       <div class="switch ${CONFIG.planejamentoProducao?'on':''}" onclick="alternarConfig('planejamentoProducao')"><div class="bolinha"></div></div></div>
     <div class="linha-config"><div class="txt"><b>Cardápio padrão por dia da semana</b><span>Salva e restaura um cardápio fixo pra cada dia (ex: toda segunda)</span></div>
       <div class="switch ${CONFIG.padroesSemana?'on':''}" onclick="alternarConfig('padroesSemana')"><div class="bolinha"></div></div></div>
+    <div class="linha-config"><div class="txt"><b>Cardápio automático pela semana</b><span>Se o dia estiver vazio, usa sozinho o padrão salvo daquele dia — sem precisar restaurar na mão</span></div>
+      <div class="switch ${CONFIG.cardapioAutomaticoSemana?'on':''}" onclick="alternarConfig('cardapioAutomaticoSemana')"><div class="bolinha"></div></div></div>
     <div class="linha-config"><div class="txt"><b>Funcionário pode ver a semana</b><span>Mostra o menu "Cardápio da semana" pro funcionário logado</span></div>
       <div class="switch ${CONFIG.permitirVerSemana?'on':''}" onclick="alternarConfig('permitirVerSemana')"><div class="bolinha"></div></div></div>
     <div class="linha-config"><div class="txt"><b>Notificar cardápio publicado</b><span>Precisa do app aberto</span></div>
