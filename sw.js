@@ -1,4 +1,4 @@
-const CACHE_NOME = 'refeitorio-v17';
+const CACHE_NOME = 'refeitorio-v18';
 const ARQUIVOS_BASE = ['./index.html', './manifest.json'];
 
 self.addEventListener('install', (evento) => {
